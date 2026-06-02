@@ -14,8 +14,9 @@ Abre `http://localhost:3000`.
 ## Spotify
 
 1. Crea una app en Spotify Developer Dashboard.
-2. Configura el redirect URI:
+2. Configura los redirect URI:
    `http://localhost:3000/api/auth/callback`
+   `https://decaciones.vercel.app/api/auth/callback`
 3. Copia `.env.example` a `.env.local`.
 4. Completa:
 
@@ -59,7 +60,7 @@ reproduccion inmediatamente tras el toque del usuario.
 1. Importa `turbillon50/decaciones` en Vercel.
 2. Agrega las variables de entorno de Spotify.
 3. Cambia `SPOTIFY_REDIRECT_URI` al dominio de produccion:
-   `https://tu-dominio.vercel.app/api/auth/callback`
+   `https://decaciones.vercel.app/api/auth/callback`
 4. Ejecuta el deploy.
 
 ## Build

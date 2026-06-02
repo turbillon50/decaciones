@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
-import { getSpotifyAuthUrl } from "@/lib/spotify";
+import { NextRequest, NextResponse } from "next/server";
+import { getSpotifyAuthUrl, getSpotifyCallbackUrl } from "@/lib/spotify";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const state = crypto.randomUUID();
-    const response = NextResponse.redirect(getSpotifyAuthUrl(state));
+    const redirectUri = getSpotifyCallbackUrl(request.url);
+    const response = NextResponse.redirect(getSpotifyAuthUrl(state, redirectUri));
     response.cookies.set("spotify_oauth_state", state, {
       httpOnly: true,
       sameSite: "lax",

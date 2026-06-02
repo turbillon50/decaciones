@@ -1,27 +1,126 @@
 import type { Metadata } from "next";
-import { CheckCircle2, KeyRound, ListPlus, Search } from "lucide-react";
+import { cookies } from "next/headers";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  KeyRound,
+  ListPlus,
+  Search,
+} from "lucide-react";
 import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
+import { getCurrentSpotifyUser } from "@/lib/spotify";
 
 export const metadata: Metadata = {
   title: "Conectar Spotify",
 };
 
-export default function SpotifyPage() {
+export const dynamic = "force-dynamic";
+
+type SpotifyPageProps = {
+  searchParams?: Promise<{
+    connected?: string;
+    disconnected?: string;
+    error?: string;
+  }>;
+};
+
+type SpotifyConnection = {
+  isConnected: boolean;
+  displayName: string;
+  sessionError?: string;
+};
+
+async function getSpotifyConnection(): Promise<SpotifyConnection> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("spotify_access_token")?.value;
+
+  if (!accessToken) {
+    return { isConnected: false, displayName: "" };
+  }
+
+  try {
+    const user = await getCurrentSpotifyUser(accessToken);
+    return {
+      isConnected: true,
+      displayName: user.display_name || user.id || "Spotify",
+    };
+  } catch {
+    return {
+      isConnected: false,
+      displayName: "",
+      sessionError: "La sesion de Spotify expiro. Conecta otra vez.",
+    };
+  }
+}
+
+export default async function SpotifyPage({ searchParams }: SpotifyPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const spotify = await getSpotifyConnection();
+  const connectionError = params.error || spotify.sessionError;
+
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pb-44 pt-24 sm:px-6 lg:pb-16">
       <section className="space-y-4">
         <p className="font-readout text-sm font-bold uppercase text-gold">
-          Integracion preparada
+          Spotify real
         </p>
         <h1 className="font-display text-4xl font-black leading-tight gold-text">
           Conecta Spotify para crear playlists desde tus decadas.
         </h1>
         <p className="max-w-2xl text-lg leading-8 text-muted">
-          Decaciones ya tiene OAuth, busqueda de tracks, creacion de playlists y
-          carga de canciones preparados para credenciales reales.
+          La demo sigue reproduciendo audio local, pero Spotify ahora puede
+          autenticar una cuenta real y guardar la sesion server-side.
         </p>
-        <SpotifyConnectButton />
+        <SpotifyConnectButton isConnected={spotify.isConnected} />
       </section>
+
+      {(spotify.isConnected || connectionError || params.disconnected) && (
+        <section className="rounded-2xl p-5 metal-panel">
+          {spotify.isConnected ? (
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-1 h-6 w-6 text-teal" aria-hidden="true" />
+              <div>
+                <h2 className="font-display text-xl font-black text-foreground">
+                  Conexion activa
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Spotify esta conectado
+                  {spotify.displayName ? ` como ${spotify.displayName}` : ""}.
+                  La rockola local permanece disponible aunque Spotify falle.
+                </p>
+              </div>
+            </div>
+          ) : connectionError ? (
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-1 h-6 w-6 text-rose" aria-hidden="true" />
+              <div>
+                <h2 className="font-display text-xl font-black text-foreground">
+                  No se pudo conectar
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  {connectionError}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Confirma que Spotify Developer Dashboard tenga este redirect
+                  URI: https://decaciones.vercel.app/api/auth/callback
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-1 h-6 w-6 text-gold" aria-hidden="true" />
+              <div>
+                <h2 className="font-display text-xl font-black text-foreground">
+                  Sesion cerrada
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Spotify fue desconectado. La demo musical local sigue lista.
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2">
         {[

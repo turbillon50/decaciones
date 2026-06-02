@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken } from "@/lib/spotify";
+import { exchangeCodeForToken, getSpotifyCallbackUrl } from "@/lib/spotify";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const token = await exchangeCodeForToken(code);
+    const token = await exchangeCodeForToken(
+      code,
+      getSpotifyCallbackUrl(request.url),
+    );
     const response = NextResponse.redirect(
       new URL("/spotify?connected=true", url.origin),
     );

@@ -41,6 +41,14 @@ type SpotifyPlaylistResponse = {
   snapshot_id?: string;
 };
 
+export type SpotifyCurrentUser = {
+  id: string;
+  display_name?: string;
+  email?: string;
+  images?: Array<{ url: string; width: number; height: number }>;
+  external_urls?: { spotify: string };
+};
+
 function requireEnv(name: string) {
   const value = process.env[name];
   if (!value) {
@@ -49,12 +57,15 @@ function requireEnv(name: string) {
   return value;
 }
 
-function getSpotifyConfig() {
+function getSpotifyCredentials() {
   return {
     clientId: requireEnv("SPOTIFY_CLIENT_ID"),
     clientSecret: requireEnv("SPOTIFY_CLIENT_SECRET"),
-    redirectUri: requireEnv("SPOTIFY_REDIRECT_URI"),
   };
+}
+
+export function getSpotifyCallbackUrl(requestUrl: string) {
+  return new URL("/api/auth/callback", requestUrl).toString();
 }
 
 async function parseSpotifyResponse<T>(response: Response): Promise<T> {
@@ -73,13 +84,17 @@ async function parseSpotifyResponse<T>(response: Response): Promise<T> {
   return payload as T;
 }
 
-export function getSpotifyAuthUrl(state = crypto.randomUUID()) {
-  const { clientId, redirectUri } = getSpotifyConfig();
+export function getSpotifyAuthUrl(
+  state = crypto.randomUUID(),
+  redirectUriOverride?: string,
+) {
+  const { clientId } = getSpotifyCredentials();
+  const redirectUri = redirectUriOverride ?? requireEnv("SPOTIFY_REDIRECT_URI");
   const params = new URLSearchParams({
     response_type: "code",
     client_id: clientId,
     scope: scopes.join(" "),
-    redirect_uri: redirectUri,
+    redirect_uri: redirectUriOverride ?? redirectUri,
     state,
     show_dialog: "false",
   });
@@ -87,8 +102,12 @@ export function getSpotifyAuthUrl(state = crypto.randomUUID()) {
   return `${authBaseUrl}?${params.toString()}`;
 }
 
-export async function exchangeCodeForToken(code: string) {
-  const { clientId, clientSecret, redirectUri } = getSpotifyConfig();
+export async function exchangeCodeForToken(
+  code: string,
+  redirectUriOverride?: string,
+) {
+  const { clientId, clientSecret } = getSpotifyCredentials();
+  const redirectUri = redirectUriOverride ?? requireEnv("SPOTIFY_REDIRECT_URI");
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString(
     "base64",
   );
@@ -102,11 +121,21 @@ export async function exchangeCodeForToken(code: string) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: redirectUri,
+      redirect_uri: redirectUriOverride ?? redirectUri,
     }),
   });
 
   return parseSpotifyResponse<SpotifyTokenResponse>(response);
+}
+
+export async function getCurrentSpotifyUser(accessToken: string) {
+  const response = await fetch(`${apiBaseUrl}/me`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return parseSpotifyResponse<SpotifyCurrentUser>(response);
 }
 
 export async function searchTracks(
