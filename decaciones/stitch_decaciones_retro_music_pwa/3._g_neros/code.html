@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&amp;family=Inter:wght@400;500&amp;family=Space+Grotesk:wght@600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#e9c349",
+                    "primary-fixed": "#ffdcc3",
+                    "on-primary": "#4d2600",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "primary-fixed-dim": "#ffb77d",
+                    "on-tertiary": "#532200",
+                    "on-secondary": "#3c2f00",
+                    "on-primary-fixed": "#2f1500",
+                    "surface-bright": "#393939",
+                    "tertiary-fixed": "#ffdbc9",
+                    "on-secondary-fixed-variant": "#574500",
+                    "tertiary-container": "#ee945c",
+                    "outline": "#a48c7a",
+                    "surface-variant": "#353534",
+                    "surface-dim": "#131313",
+                    "on-surface-variant": "#ddc1ae",
+                    "on-secondary-container": "#342800",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-highest": "#353534",
+                    "on-tertiary-fixed": "#321200",
+                    "on-surface": "#e5e2e1",
+                    "tertiary-fixed-dim": "#ffb68c",
+                    "on-secondary-fixed": "#241a00",
+                    "surface": "#131313",
+                    "surface-container-high": "#2a2a2a",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-background": "#e5e2e1",
+                    "tertiary": "#ffb68c",
+                    "inverse-on-surface": "#313030",
+                    "surface-container": "#201f1f",
+                    "primary": "#ffb77d",
+                    "surface-tint": "#ffb77d",
+                    "secondary-container": "#af8d11",
+                    "secondary-fixed": "#ffe088",
+                    "on-tertiary-fixed-variant": "#753401",
+                    "primary-container": "#ff8c00",
+                    "on-error": "#690005",
+                    "outline-variant": "#564334",
+                    "error-container": "#93000a",
+                    "surface-container-low": "#1c1b1b",
+                    "inverse-primary": "#904d00",
+                    "inverse-surface": "#e5e2e1",
+                    "on-primary-container": "#623200",
+                    "on-tertiary-container": "#692e00",
+                    "background": "#131313",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#e9c349"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "card-gap": "24px",
+                    "margin-mobile": "20px",
+                    "gutter": "16px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "display-vinyl": ["Chivo"],
+                    "headline-lg": ["Chivo"],
+                    "headline-md": ["Chivo"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg-mobile": ["Chivo"],
+                    "label-caps": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "display-vinyl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "900"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "38px", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #121212;
+            color: #e5e2e1;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 220, 195, 0.1);
+        }
+        .metallic-border {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .filament-glow {
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-background min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 border-b border-outline-variant/10 bg-surface/90 backdrop-blur-xl shadow-[0_-1px_0_rgba(255,220,195,0.1)_inset] flex justify-between items-center px-margin-mobile h-20">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 duration-200 hover:opacity-80 transition-opacity text-primary">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-display-vinyl text-headline-lg-mobile text-primary tracking-tighter uppercase">DECACIONES</h1>
+</div>
+<button class="active:scale-95 duration-200 hover:opacity-80 transition-opacity text-primary">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pt-28 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto">
+<!-- Header Section -->
+<section class="mb-10">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-primary mb-2">GÉNEROS</h2>
+<p class="text-on-surface-variant font-body-lg">Explora la música que definió cada era.</p>
+</section>
+<!-- Bento Grid for Genres -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-card-gap">
+<!-- Salsa -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="A cinematic, high-contrast photograph of a vintage vinyl record spinning on a classic wooden turntable. Warm amber lighting catches the grooves of the record, creating a nostalgic, premium analog feel. The background is a moody, dark gunmetal grey with subtle textures of brushed metal and wood, evoking a luxury hi-fi aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAS_SLz5SUrKnXzqyCuzzBMYxImosfQJM6_ex0pbxa-l1GXA7nBg8Cgy3i-SntLreai0XOPnYswEuVYOqXaKih9lit6DlbaKXshod2W7HjXcFpwHhuixB118224yPA1XOuZB9nslBFId-5-at5YgkSwciWOq9S6QqV93S1t0YQ7zZDERTfszxLajRkAkUUNNxTcXqLzV8-_Bd4_D7QWPETi_hYBUwGzx0aVWU9jlypXbB3ciKKIfl4-idW3YfLyR4xeEIJEpvi70dzV"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+<span class="font-label-caps text-secondary text-xs">CALIENTE</span>
+</div>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Salsa</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Clásicos que nunca pasan</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">1,240 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Merengue -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="Abstract atmospheric photography of gold-tinted sound waves and frequency patterns glowing against a deep, dark professional gunmetal surface. The visual style is cinematic and sophisticated, emphasizing mechanical precision and the warmth of vacuum tube technology with soft amber glares and crisp metallic edges." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQGnZlG6GfLrLb46sHq7qceLhPdGBqJzOpgdqRf8dcuIHhh4W2ZjRJ63EevyXy4CzSRxv5XK_bwhyXoMT4mxzDFsoOim7mrcqKvCrPLGwjnyLWk9ZOnNHv2vdiE4D1Oh2OJY7jy-4gH6M6JgYePImq7UJumw24na5d8Xm1wMFCSfY7uMOZUpQ0HEbzZ_A740o5bxEeEY-EvUL_2kjKU8MpJRWDXK89LNE2gw0XfOW7Audm25wI-jwQlfUQDl-GmpYhgJ_cdc_4PSiL"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
+<span class="font-label-caps text-secondary text-xs">RITMO</span>
+</div>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Merengue</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Pura energía caribeña</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">850 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Románticas (Featured Large Card) -->
+<div class="col-span-2 glass-card metallic-border rounded-xl p-unit flex flex-row gap-4 group cursor-pointer hover:scale-[1.01] transition-transform duration-300 relative overflow-hidden">
+<div class="w-1/2 aspect-square rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up detail of a high-end vintage audio amplifier's golden glowing tubes and analog VU meters. The surface is brushed gunmetal with precision-engineered dials. The lighting is low and cinematic, with a warm amber filament glow illuminating the intricate glass components and metallic textures for an heirloom luxury feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIjBWyC07K7diuvP9yOtFjJOEIWsdj6267NdtzXBvcxtrWJW0_tiGDntpbI0OHT7d3M0SjsfgIZdJV2rpjc0hR0mgFRWCWbn-Vku_Zg-iP1x7iCaIpSlvjEDQHnksNtGs5ZIJobJ9li93-ZseBbfmQRMHjIeKwkcmUUSbcc9uYPjDMA9B4zov71L-qilHqy4TwTj6mVtKqhm092YvubdIkyERMmm0nNoF8EkiJaHMxroZWWGWI_IwZqoBiGkh5VNrQ6hPbKOIBsYSd"/>
+</div>
+<div class="w-1/2 flex flex-col justify-center pr-2">
+<span class="font-label-caps text-secondary mb-2">LO MÁS ESCUCHADO</span>
+<h3 class="font-headline-lg text-primary mb-2 leading-none">Románticas</h3>
+<p class="text-on-surface-variant text-sm mb-4">Para noches inolvidables bajo la luz de las estrellas.</p>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-on-surface-variant/60">3,500 TRACKS</span>
+<div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary filament-glow w-[75%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Baladas -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="A minimalist portrait of a vintage microphone standing in a pool of soft spotlighting on a dark stage. The style is classic and timeless, with rich shadows and high-key highlights on the chrome mesh. The background is a deep charcoal black, creating a sense of intimate performance and premium cinematic warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWbJiLLvu7idp9A6ybVkvMMIWTAqNzIFlHnylXsT8etGPwq78OmUzWR8pdh5GEdh48ddbxvH8tUDNT7N_1sn2QPC3Rv5cSAYumjM30MJKg586U0WJoiUh5ALhknM53UXEwQrw8WPZtlkDCptXLO0tC_itvg95d9zoM6Vfm3SrxDIJn-6qg8BuaKy0kzCOpPkvA4q81S5DbJqBEjzFAstLgNEdWFvo7jkGETe6NoOuw5yPbvMQGQUCOjFRt1KtNT_LIZCE1H4UKmRQ8"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Baladas</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Voces que enamoran</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">2,100 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Rock en Español -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="A macro shot of electric guitar strings vibrating against a dark fretboard. The lighting is dramatic, with golden side-lighting emphasizing the metallic texture of the strings and the wood grain. The aesthetic is professional and high-fidelity, balancing cold metal with warm amber highlights in a future-nostalgic style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdEs7Laf7WnledexytiZwM0I5X1aSciUAaZjx0hcFUZ748Zvr3dh_q0qeosxFexgPnZDPCmkM3Is0ulMKZpC9JSKoMWaFapAAYZY1AMILFY0lQVMVbd_uB21fyb_kpFAefJ8zt7oN1NQrB5MXFZd-u7mJRZ0wkzY-uEdyW6kP1u9x71t__s2HezXeuBE7mhV-A-e2v-Tdu8pYmyxmO-1HyJpXRKTh4MFqjLCsEN5EhHUQUtE8B9CyfN9KSk5HyYl9ZBqnluLWV2ihN"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Rock en Español</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">La rebeldía de una década</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">1,800 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Electrónica -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="Neon pulses of amber and deep orange light streaking across a dark, reflective technical surface, mimicking fiber optic cables or digital circuits. The aesthetic is futurist yet warm, using glassmorphism effects and deep shadows to create a layered, sophisticated interface feel that suggests speed and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVgVmBnrMfeFbfzReNeeGEOWvlteZLJbyFigA7oF_Gg7XvurylxfYDhlkVc2v3TbKDcDz2aeedH9TjXtCVXlasoQgBaj5CB4kehM-u7n68wPp9uPrCuMAA_6TMyZE6U_TbuE9ePGtuNbRDc64olx_T78PaeDH2QzZocmkYXbMbz9VRxS2hNFMZL4pne6HybjXlavDdOeYWbScM8RuigtsbB6WsJAstU8Jpv0bJmDShv_8HUmmymiks4gT2iR1IPC0JTzuPydIyIXcY"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Electrónica</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Sintetizadores y neón</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">950 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Disco -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="Close-up of a multifaceted disco ball reflecting warm gold and amber light onto a dark, smoky dance floor. The focus is sharp on the metallic mirrors, creating a luxury retro-future vibe. The lighting is cinematic, with high diffusion and soft glows that evoke the glamorous and prestige atmosphere of an elite 70s lounge." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmlNMOurWBoXo5-qEaN4QmU4hS95gFOZ57UbiSVc9CrhSloDc7urqRAXn0TKl3sDboGPu0GfwC1HWEczmieirNd_htOErQmjm5jIureyDHL1Az28mVzAoiievkXjw3oSSdIXPjdt3aI_MqkfGxLRlz8brfg4dYtl2Mf3ZGGKkP2rjaTWC_ncgOyB9rVq8nISijr0VvytvfsDzRUUUQZlyBnV2UTLH3oppE_cLo3oaqLAMMNV4LKnIoOqLszofbW6M3_kawzbph1_zC"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Disco</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Fiebre de sábado noche</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">1,100 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Jazz -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="A sleek saxophone resting on a velvet-lined case, illuminated by a single warm spotlight. The brass surface shows elegant patina and precision craftsmanship. The surrounding environment is dark and professional, with a focus on tactile skeuomorphism and the rich, organic textures of an analog musical heirloom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqXhiSLL-mlaffSE3SM5rjgbjT8MihGjtPpumRFhJKvor-5nG6nbJc862CnAHdZZUaZiKI0RdA35Z5ANwgAmdXUtI0qYfAVfbDLLquSIy-UEDj1zU1pbjCSGwJ1Hezk50uxZjAW01qS-NdbmSj1tE2cnZj13bNN3EN-qNkpfLfcaN_sOG1QaJDf_RRsSB7z39JHtb9lpGdBIQw9KJl_DAkDIOf857RPDMHv8RxNuVievPankJ0kBeaVrdKAMavIkrO7T-jz9yC9bqA"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Jazz</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Elegancia improvisada</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">540 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Boleros -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="A vintage acoustic guitar detail showing the polished dark wood and silver tuning pegs. Soft amber light spills across the curves of the instrument, creating a warm, comfortable prestige aesthetic. The background is a soft-focus library of records, emphasizing a high-end analog luxury and historical depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNpeX4f3k_l2kg3oBL0SFdMt5mKFAdOvtiYC5Qc0p2Nt4Y--bS8wPBciGFe3V_U7Q38rD984oJ4ICQtzT989jgnmOGArAzNJbTVnS-JSwE8GwDGy_BcVUMdFmMLHr46sR1s5ED61VY2Y_gcAHgnItcuQOldHQXNlk2qbdrVwOz1yQzQ0FIkT7eL-aRodFrPWKPZFsjvOJySCFm0v9hga3V9w9nFiG9JPAJnLmb2C-Rau_lwS_piulLcOxm1kjf9Vzlg_k1DelCkVIo"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Boleros</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Sentimiento y nostalgia</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">720 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+<!-- Cumbia -->
+<div class="glass-card metallic-border rounded-xl p-unit flex flex-col group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+<div class="aspect-square rounded-lg overflow-hidden relative mb-3">
+<img class="w-full h-full object-cover" data-alt="Dynamic photo of traditional percussion instruments, specifically a conga drum, under warm stage lights. The texture of the drum head and the metallic hardware are sharply detailed. The palette is dominated by deep browns, golds, and blacks, creating a tactile and celebratory atmosphere typical of premium Latin music production." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmON4U0tSne3JGwIqwaPJ5lnNnqBT50knDe7kRsqlAvDHXibSa23KQOZIyCJYKD0QoN_LOvKIY1o-Y5bGwKQZ4V64qB1bIiV0i5NXtTixEIKkrA3dg617B10YhhADjWXVf2WMlghNM6xo9nW2LcN9JT7fs0uU4amvfl9W8-KxCFKJhVSw2-WpXnuoJQ7UUsO0IwkCDAXNyS-9tfcNdBNIRR6aws5B9wCTeVKX_Rc2M2jvOUIvochu9jgjXeskjfe4JDavnIKC8ZhaK"/>
+</div>
+<h3 class="font-headline-md text-primary mb-1">Cumbia</h3>
+<p class="text-on-surface-variant text-xs line-clamp-1 mb-2">Sabor que no se detiene</p>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-label-caps text-on-surface-variant/60 text-[10px]">1,450 TRACKS</span>
+<span class="material-symbols-outlined text-primary text-lg" data-icon="play_circle">play_circle</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-high/95 backdrop-blur-[30px] border-t border-outline-variant/20 rounded-t-xl shadow-[0_-10px_40px_rgba(8,5,0,0.6)] flex justify-around items-center pt-unit pb-8">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors active:inner-shadow-lg duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="history_toggle_off">history_toggle_off</span>
+<span class="font-label-caps text-[10px] uppercase">Décadas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_10px_rgba(255,183,125,0.3)] hover:text-primary-fixed-dim transition-colors active:inner-shadow-lg duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="library_music" style="font-variation-settings: 'FILL' 1;">library_music</span>
+<span class="font-label-caps text-[10px] uppercase">Géneros</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors active:inner-shadow-lg duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="favorite">favorite</span>
+<span class="font-label-caps text-[10px] uppercase">Favoritas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors active:inner-shadow-lg duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label-caps text-[10px] uppercase">IA</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors active:inner-shadow-lg duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-label-caps text-[10px] uppercase">Ajustes</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for tiles
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.97)';
+                card.style.boxShadow = 'inset 2px 2px 4px rgba(0,0,0,0.5)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1.02)';
+                card.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.5)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+                card.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.5)';
+            });
+        });
+    </script>
+</body></html>

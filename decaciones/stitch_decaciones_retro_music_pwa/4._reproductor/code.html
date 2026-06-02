@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@100..900&amp;family=Inter:wght@100..900&amp;family=Space+Grotesk:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#e9c349",
+                      "primary-fixed": "#ffdcc3",
+                      "on-primary": "#4d2600",
+                      "on-primary-fixed-variant": "#6e3900",
+                      "primary-fixed-dim": "#ffb77d",
+                      "on-tertiary": "#532200",
+                      "on-secondary": "#3c2f00",
+                      "on-primary-fixed": "#2f1500",
+                      "surface-bright": "#393939",
+                      "tertiary-fixed": "#ffdbc9",
+                      "on-secondary-fixed-variant": "#574500",
+                      "tertiary-container": "#ee945c",
+                      "outline": "#a48c7a",
+                      "surface-variant": "#353534",
+                      "surface-dim": "#131313",
+                      "on-surface-variant": "#ddc1ae",
+                      "on-secondary-container": "#342800",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-highest": "#353534",
+                      "on-tertiary-fixed": "#321200",
+                      "on-surface": "#e5e2e1",
+                      "tertiary-fixed-dim": "#ffb68c",
+                      "on-secondary-fixed": "#241a00",
+                      "surface": "#131313",
+                      "surface-container-high": "#2a2a2a",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-background": "#e5e2e1",
+                      "tertiary": "#ffb68c",
+                      "inverse-on-surface": "#313030",
+                      "surface-container": "#201f1f",
+                      "primary": "#ffb77d",
+                      "surface-tint": "#ffb77d",
+                      "secondary-container": "#af8d11",
+                      "secondary-fixed": "#ffe088",
+                      "on-tertiary-fixed-variant": "#753401",
+                      "primary-container": "#ff8c00",
+                      "on-error": "#690005",
+                      "outline-variant": "#564334",
+                      "error-container": "#93000a",
+                      "surface-container-low": "#1c1b1b",
+                      "inverse-primary": "#904d00",
+                      "inverse-surface": "#e5e2e1",
+                      "on-primary-container": "#623200",
+                      "on-tertiary-container": "#692e00",
+                      "background": "#131313",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#e9c349"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "40px",
+                      "card-gap": "24px",
+                      "margin-mobile": "20px",
+                      "gutter": "16px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "display-vinyl": ["Chivo"],
+                      "headline-lg": ["Chivo"],
+                      "headline-md": ["Chivo"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg-mobile": ["Chivo"],
+                      "label-caps": ["Space Grotesk"]
+              },
+              "fontSize": {
+                      "display-vinyl": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "900"}],
+                      "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "38px", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .glass-panel {
+            background: rgba(25, 25, 25, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 220, 195, 0.05);
+        }
+        .metallic-button {
+            background: linear-gradient(145deg, #333333, #1a1a1a);
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.4), -1px -1px 2px rgba(255,255,255,0.05);
+        }
+        .metallic-button:active {
+            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
+            transform: scale(0.96);
+        }
+        .glow-filament {
+            box-shadow: 0 0 12px rgba(255, 140, 0, 0.6), 0 0 4px rgba(255, 140, 0, 0.4);
+        }
+        .click-wheel-bg {
+            background: radial-gradient(circle at center, #2a2a2a 0%, #1a1a1a 100%);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.05);
+        }
+        @keyframes rotate-vinyl {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: rotate-vinyl 20s linear infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface selection:bg-primary/30 min-h-screen flex flex-col font-body-md overflow-hidden">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-20 border-b border-outline-variant/10 bg-surface/90 backdrop-blur-xl shadow-[0_-1px_0_rgba(255,220,195,0.1)_inset]">
+<button class="active:scale-95 duration-200 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<span class="font-display-vinyl text-headline-lg-mobile text-primary tracking-tighter">DECACIONES</span>
+<button class="active:scale-95 duration-200 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-on-surface-variant">settings</span>
+</button>
+</nav>
+<!-- Main Player Canvas -->
+<main class="flex-1 mt-20 pb-10 overflow-y-auto px-margin-mobile flex flex-col items-center">
+<!-- Album Art Section (Tactile Card) -->
+<div class="relative w-full max-w-md aspect-square mt-6 mb-10 group">
+<div class="absolute inset-0 bg-primary/20 blur-[60px] rounded-full scale-75 opacity-30 group-hover:opacity-50 transition-opacity duration-700"></div>
+<div class="relative z-10 w-full h-full p-2 rounded-xl glass-panel shadow-2xl flex items-center justify-center">
+<div class="w-full h-full overflow-hidden rounded-lg shadow-inner border border-white/5 relative">
+<img alt="Soda Stereo - Persiana Americana Album Art" class="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-500" data-alt="A moody, cinematic high-contrast close-up of a classic rock vinyl record cover featuring an 80s aesthetic with neon blue and warm amber lighting. The scene is set in a dark, professional audio studio with soft bokeh highlights. The visual style is premium and nostalgic, echoing the luxury of high-end analog equipment through deep blacks and rich golden tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO71VWq3WIyMjCSKJ6wj_DCtTiR--rSzrlbL868e3Q8OqxYbaLycTf8KJK06oQktpPQZV5XAKIQ97Ki3t96OVOhKtr5ThAZ5cxXLkVj76tLubJrxkPBTJqRb9Yxxt4xf5zn8UdBlZZJy2nBxEuZQhzxfThLvresOm0rTWBHjtuOT6GtU8p3Vz5wHDD6-RJ14ds6c2LCn8qS6ZP7cnT0CVWuap29oMnuvZtf4f-z8gd79L5tCiHhzOb4bqNg_SqNQ2vHqKPzG3BYFyC"/>
+<!-- Vinyl Spin Effect Overlay -->
+<div class="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/10 pointer-events-none"></div>
+</div>
+</div>
+</div>
+<!-- Track Information -->
+<div class="text-center mb-8 w-full max-w-md">
+<h1 class="font-headline-lg-mobile text-on-surface tracking-tight mb-1">Persiana Americana</h1>
+<p class="font-body-lg text-primary-fixed-dim opacity-80">Soda Stereo — Signos (1986)</p>
+</div>
+<!-- Progress Bar (Glow Rail) -->
+<div class="w-full max-w-md mb-10 group">
+<div class="flex justify-between items-center mb-3">
+<span class="font-label-caps text-on-surface-variant">02:45</span>
+<span class="font-label-caps text-on-surface-variant">04:52</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest rounded-full relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-[62%] bg-primary glow-filament rounded-full transition-all duration-300"></div>
+<!-- Subtle Scrubber Handle -->
+<div class="absolute top-0 left-[62%] -ml-2 w-4 h-4 bg-white rounded-full -mt-1 shadow-lg border-2 border-primary cursor-pointer active:scale-125 transition-transform"></div>
+</div>
+</div>
+<!-- iPod Inspired Control Wheel -->
+<div class="w-64 h-64 rounded-full click-wheel-bg relative flex items-center justify-center shadow-[0_20px_50px_rgba(0,0,0,0.6)] mb-12 select-none group">
+<!-- Labels -->
+<button class="absolute top-4 font-label-caps text-on-surface-variant hover:text-primary transition-colors">MENU</button>
+<button class="absolute bottom-4 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">play_pause</span>
+</button>
+<button class="absolute left-4 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">skip_previous</span>
+</button>
+<button class="absolute right-4 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant text-3xl">skip_next</span>
+</button>
+<!-- Center Action Button -->
+<button class="w-24 h-24 rounded-full metallic-button flex items-center justify-center border border-white/5 z-20 group-active:scale-95 transition-transform duration-150">
+<div class="w-16 h-16 rounded-full bg-gradient-to-br from-white/5 to-transparent border border-white/5 flex items-center justify-center">
+<div class="w-4 h-4 rounded-full bg-primary glow-filament"></div>
+</div>
+</button>
+<!-- Wheel Interaction Overlay (Atmospheric) -->
+<div class="absolute inset-0 rounded-full border-[20px] border-transparent active:border-white/[0.02] transition-colors pointer-events-none"></div>
+</div>
+<!-- Secondary Controls -->
+<div class="flex items-center justify-between w-full max-w-xs mb-10">
+<button class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">shuffle</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-surface-container-high border border-outline-variant/20 flex items-center justify-center text-primary drop-shadow-[0_0_8px_rgba(255,183,125,0.2)]">
+<span class="material-symbols-outlined fill-icon">favorite</span>
+</button>
+<button class="w-12 h-12 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">repeat</span>
+</button>
+</div>
+<!-- Output Selection (Salida de audio) -->
+<button class="flex items-center gap-3 px-6 py-3 rounded-full glass-panel text-on-surface-variant active:scale-95 transition-all mb-10 border border-white/10">
+<span class="material-symbols-outlined text-primary">speaker_group</span>
+<span class="font-label-caps">SALIDA: SALÓN PRINCIPAL</span>
+<span class="material-symbols-outlined text-xs">expand_more</span>
+</button>
+</main>
+<!-- Bottom Navigation Shell -->
+<div class="fixed bottom-0 left-0 w-full flex justify-around items-center pt-unit pb-6 bg-surface-container-high/95 backdrop-blur-[30px] border-t border-outline-variant/20 shadow-[0_-10px_40px_rgba(8,5,0,0.6)] z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">history_toggle_off</span>
+<span class="font-label-caps mt-1">DÉCADAS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">library_music</span>
+<span class="font-label-caps mt-1">GÉNEROS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_10px_rgba(255,183,125,0.3)]" href="#">
+<span class="material-symbols-outlined fill-icon">favorite</span>
+<span class="font-label-caps mt-1">FAVORITAS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-label-caps mt-1">IA</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps mt-1">AJUSTES</span>
+</a>
+</div>
+<script>
+        // Micro-interaction for the click wheel
+        const wheel = document.querySelector('.click-wheel-bg');
+        let isRotating = false;
+        
+        wheel.addEventListener('mousedown', () => isRotating = true);
+        window.addEventListener('mouseup', () => isRotating = false);
+        
+        wheel.addEventListener('mousemove', (e) => {
+            if (isRotating) {
+                // Subtle haptic feedback emulation or visual feedback could be added here
+                const rect = wheel.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                const angle = Math.atan2(y, x) * (180 / Math.PI);
+                // logic for scroll volume or track skipping could go here
+            }
+        });
+
+        // Toggle Favorite
+        const favBtn = document.querySelector('.metallic-button + div button, .fill-icon').parentElement;
+        favBtn?.addEventListener('click', function() {
+            const icon = this.querySelector('.material-symbols-outlined');
+            icon.classList.toggle('fill-icon');
+            this.classList.toggle('text-primary');
+        });
+    </script>
+</body></html>
