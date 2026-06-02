@@ -31,9 +31,14 @@ La integracion esta preparada con:
 
 - `getSpotifyAuthUrl()`
 - `exchangeCodeForToken()`
+- `getCurrentSpotifyUser()`
 - `searchTracks()`
 - `createPlaylist()`
 - `addTracksToPlaylist()`
+
+La pantalla `/spotify` puede autenticar la cuenta, leer el usuario conectado y
+crear una playlist privada real en Spotify desde una decada, genero o playlist
+mock de Decaciones.
 
 Spotify no bloquea la demo: si no hay sesion conectada, Decaciones reproduce
 audio local desde `public/audio`.

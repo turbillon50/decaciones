@@ -8,6 +8,8 @@ import {
   Search,
 } from "lucide-react";
 import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
+import { SpotifyPlaylistCreator } from "@/components/SpotifyPlaylistCreator";
+import { decades, genres, playlists } from "@/data/music";
 import { getCurrentSpotifyUser } from "@/lib/spotify";
 
 export const metadata: Metadata = {
@@ -57,6 +59,26 @@ export default async function SpotifyPage({ searchParams }: SpotifyPageProps) {
   const params = searchParams ? await searchParams : {};
   const spotify = await getSpotifyConnection();
   const connectionError = params.error || spotify.sessionError;
+  const playlistSources = [
+    ...decades.map((decade) => ({
+      id: decade.id,
+      title: decade.label,
+      description: decade.description,
+      tracks: decade.tracks.length,
+    })),
+    ...genres.slice(0, 4).map((genre) => ({
+      id: genre.id,
+      title: genre.name,
+      description: genre.description,
+      tracks: genre.tracks.length,
+    })),
+    ...playlists.slice(0, 2).map((playlist) => ({
+      id: playlist.id,
+      title: playlist.title,
+      description: playlist.description,
+      tracks: playlist.tracks.length,
+    })),
+  ];
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pb-44 pt-24 sm:px-6 lg:pb-16">
@@ -121,6 +143,11 @@ export default async function SpotifyPage({ searchParams }: SpotifyPageProps) {
           )}
         </section>
       )}
+
+      <SpotifyPlaylistCreator
+        isConnected={spotify.isConnected}
+        sources={playlistSources}
+      />
 
       <section className="grid gap-4 sm:grid-cols-2">
         {[
