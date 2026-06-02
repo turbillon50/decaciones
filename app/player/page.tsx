@@ -6,7 +6,7 @@ import { PlayerControls } from "@/components/PlayerControls";
 import { usePlayer } from "@/lib/player-store";
 
 export default function PlayerPage() {
-  const { currentTrack, isPlaying } = usePlayer();
+  const { currentTrack, isPlaying, queue, playTrack } = usePlayer();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-28 pt-24 sm:px-6 lg:grid lg:grid-cols-[1fr_24rem] lg:items-start lg:pb-16">
@@ -61,19 +61,23 @@ export default function PlayerPage() {
             <h2 className="font-display text-xl font-black">Cola actual</h2>
           </div>
           <ol className="mt-5 space-y-3">
-            {["Soda Stereo", "Mana", "Daft Punk", "Ruben Blades"].map(
-              (artist, index) => (
-                <li
-                  key={artist}
-                  className="flex items-center justify-between rounded-xl bg-surface-2/70 px-3 py-3 text-sm text-muted"
+            {queue.map((track, index) => (
+              <li
+                key={`${track.id}-${index}`}
+                className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/70 px-3 py-3 text-sm text-muted"
+              >
+                <button
+                  type="button"
+                  onClick={() => playTrack(track, queue)}
+                  className="min-w-0 flex-1 truncate text-left transition hover:text-primary"
                 >
-                  <span>{artist}</span>
-                  <span className="font-readout text-gold">
-                    {(index + 1).toString().padStart(2, "0")}
-                  </span>
-                </li>
-              ),
-            )}
+                  {track.title} - {track.artist}
+                </button>
+                <span className="font-readout text-gold">
+                  {(index + 1).toString().padStart(2, "0")}
+                </span>
+              </li>
+            ))}
           </ol>
         </section>
       </aside>

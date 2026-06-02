@@ -34,6 +34,26 @@ La integracion esta preparada con:
 - `createPlaylist()`
 - `addTracksToPlaylist()`
 
+Spotify no bloquea la demo: si no hay sesion conectada, Decaciones reproduce
+audio local desde `public/audio`.
+
+## Audio demo
+
+La demo incluye WAVs locales en:
+
+- `public/audio/60s`
+- `public/audio/70s`
+- `public/audio/80s`
+- `public/audio/90s`
+- `public/audio/2000s`
+- `public/audio/salsa`
+- `public/audio/merengue`
+- `public/audio/romanticas`
+- `public/audio/electronica`
+
+Cada tarjeta de decada o genero carga una playlist mock y comienza la
+reproduccion inmediatamente tras el toque del usuario.
+
 ## Deploy en Vercel
 
 1. Importa `turbillon50/decaciones` en Vercel.

@@ -2,15 +2,34 @@
 
 import { Music2, Play } from "lucide-react";
 import type { Genre } from "@/lib/types";
+import { withAudioCategory } from "@/lib/audio";
 import { usePlayer } from "@/lib/player-store";
 import { accentClasses, cn } from "@/lib/utils";
 
 export function GenreCard({ genre }: { genre: Genre }) {
   const { playTrack } = usePlayer();
-  const firstTrack = genre.tracks[0];
+  const audioCategory = genre.id === "rock-espanol" ? "90s" : genre.id;
+  const demoQueue = withAudioCategory(genre.tracks, audioCategory);
+  const firstTrack = demoQueue[0];
+  const handlePlay = () => {
+    if (firstTrack) {
+      playTrack(firstTrack, demoQueue);
+    }
+  };
 
   return (
-    <article className="group rounded-2xl p-5 metal-panel">
+    <article
+      role="button"
+      tabIndex={0}
+      onClick={handlePlay}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handlePlay();
+        }
+      }}
+      className="group cursor-pointer rounded-2xl p-5 metal-panel"
+    >
       <div className="flex items-start justify-between gap-4">
         <div
           className={cn(
@@ -22,7 +41,10 @@ export function GenreCard({ genre }: { genre: Genre }) {
         </div>
         <button
           type="button"
-          onClick={() => firstTrack && playTrack(firstTrack, genre.tracks)}
+          onClick={(event) => {
+            event.stopPropagation();
+            handlePlay();
+          }}
           className="metal-button grid h-11 w-11 place-items-center rounded-full text-primary"
           aria-label={`Reproducir ${genre.name}`}
         >

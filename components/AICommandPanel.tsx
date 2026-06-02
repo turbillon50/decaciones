@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mic, Play, Sparkles } from "lucide-react";
 import { aiPrompts } from "@/data/music";
+import { withAudioCategory } from "@/lib/audio";
 import { usePlayer } from "@/lib/player-store";
 
 export function AICommandPanel() {
@@ -10,6 +11,21 @@ export function AICommandPanel() {
   const [activePromptId, setActivePromptId] = useState(aiPrompts[0].id);
   const activePrompt =
     aiPrompts.find((prompt) => prompt.id === activePromptId) ?? aiPrompts[0];
+  const activeQueue = withAudioCategory(
+    activePrompt.tracks,
+    activePrompt.audioCategory,
+  );
+
+  const selectPrompt = (promptId: string) => {
+    const nextPrompt =
+      aiPrompts.find((prompt) => prompt.id === promptId) ?? aiPrompts[0];
+    const nextQueue = withAudioCategory(
+      nextPrompt.tracks,
+      nextPrompt.audioCategory,
+    );
+    setActivePromptId(nextPrompt.id);
+    playTrack(nextQueue[0], nextQueue);
+  };
 
   return (
     <section className="space-y-8">
@@ -63,7 +79,7 @@ export function AICommandPanel() {
           <button
             key={item.id}
             type="button"
-            onClick={() => setActivePromptId(item.id)}
+            onClick={() => selectPrompt(item.id)}
             className="rounded-full border border-line/60 bg-surface-2/70 px-5 py-4 font-readout text-sm font-bold text-muted transition hover:border-primary/60 hover:text-primary"
           >
             &quot;{item.prompt}&quot;
@@ -73,7 +89,7 @@ export function AICommandPanel() {
 
       <button
         type="button"
-        onClick={() => playTrack(activePrompt.tracks[0], activePrompt.tracks)}
+        onClick={() => playTrack(activeQueue[0], activeQueue)}
         className="metal-button flex h-14 w-full items-center justify-center gap-3 rounded-full text-base font-black text-primary"
       >
         <Play className="h-5 w-5" fill="currentColor" aria-hidden="true" />

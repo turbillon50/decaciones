@@ -339,13 +339,15 @@ export const aiPrompts: AIPrompt[] = [
     prompt: "Llevame a 1987",
     response:
       "Cargando 1987: pop latino brillante, radio FM y cassettes recien grabados.",
+    audioCategory: "80s",
     tracks: [tracks[7], tracks[6], tracks[8]],
   },
   {
-    id: "salsa-90",
-    prompt: "Pon salsa de los 90",
+    id: "salsa",
+    prompt: "Pon salsa",
     response:
-      "Salsa noventera lista: soneros, metales al frente y energia de pista.",
+      "Salsa lista: soneros, metales al frente y energia de pista desde el primer compas.",
+    audioCategory: "salsa",
     tracks: playlists[3].tracks,
   },
   {
@@ -353,6 +355,7 @@ export const aiPrompts: AIPrompt[] = [
     prompt: "Pon romanticas de los 80",
     response:
       "Baladas de los 80 seleccionadas con brillo de cassette y luz de salon.",
+    audioCategory: "romanticas",
     tracks: playlists[2].tracks,
   },
   {
@@ -360,6 +363,7 @@ export const aiPrompts: AIPrompt[] = [
     prompt: "Pon musica para manejar",
     response:
       "Ruta abierta: rock en espanol, merengue y un cierre electronico para avanzar.",
+    audioCategory: "90s",
     tracks: playlists[1].tracks,
   },
 ];

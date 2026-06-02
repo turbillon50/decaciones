@@ -2,6 +2,7 @@
 
 import { Play } from "lucide-react";
 import type { Decade } from "@/lib/types";
+import { withAudioCategory } from "@/lib/audio";
 import { usePlayer } from "@/lib/player-store";
 import { accentClasses, cn } from "@/lib/utils";
 
@@ -13,12 +14,27 @@ export function DecadeCard({
   compact?: boolean;
 }) {
   const { playTrack } = usePlayer();
-  const firstTrack = decade.tracks[0];
+  const demoQueue = withAudioCategory(decade.tracks, decade.id);
+  const firstTrack = demoQueue[0];
+  const handlePlay = () => {
+    if (firstTrack) {
+      playTrack(firstTrack, demoQueue);
+    }
+  };
 
   return (
     <article
+      role="button"
+      tabIndex={0}
+      onClick={handlePlay}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handlePlay();
+        }
+      }}
       className={cn(
-        "group relative overflow-hidden rounded-2xl p-5 metal-panel transition duration-300 hover:-translate-y-1",
+        "group relative cursor-pointer overflow-hidden rounded-2xl p-5 metal-panel transition duration-300 hover:-translate-y-1",
         compact ? "min-h-64" : "min-h-72",
       )}
     >
@@ -53,7 +69,10 @@ export function DecadeCard({
           </span>
           <button
             type="button"
-            onClick={() => firstTrack && playTrack(firstTrack, decade.tracks)}
+            onClick={(event) => {
+              event.stopPropagation();
+              handlePlay();
+            }}
             className="metal-button grid h-12 w-12 shrink-0 place-items-center rounded-full text-primary transition group-hover:scale-105"
             aria-label={`Reproducir ${decade.label}`}
           >

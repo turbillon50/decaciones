@@ -7,6 +7,13 @@ export type GenreId =
   | "electronica"
   | "rock-espanol";
 
+export type AudioCategory =
+  | DecadeId
+  | "salsa"
+  | "merengue"
+  | "romanticas"
+  | "electronica";
+
 export type Track = {
   id: string;
   title: string;
@@ -17,6 +24,7 @@ export type Track = {
   genre: GenreId;
   durationSeconds: number;
   cover: string;
+  audioSrc?: string;
   spotifyQuery: string;
 };
 
@@ -52,5 +60,6 @@ export type AIPrompt = {
   id: string;
   prompt: string;
   response: string;
+  audioCategory: AudioCategory;
   tracks: Track[];
 };

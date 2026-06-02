@@ -8,6 +8,7 @@ import {
   Shuffle,
   SkipBack,
   SkipForward,
+  Volume2,
 } from "lucide-react";
 import { formatTime, usePlayer } from "@/lib/player-store";
 import { cn } from "@/lib/utils";
@@ -17,26 +18,34 @@ export function PlayerControls({ wheel = false }: { wheel?: boolean }) {
     currentTrack,
     isPlaying,
     progress,
+    duration,
+    volume,
+    shuffleEnabled,
+    repeatEnabled,
     setProgress,
+    setVolume,
     togglePlay,
     nextTrack,
     previousTrack,
     toggleFavorite,
     isFavorite,
+    toggleShuffle,
+    toggleRepeat,
   } = usePlayer();
-  const percent = (progress / currentTrack.durationSeconds) * 100;
+  const activeDuration = duration || currentTrack.durationSeconds;
+  const percent = activeDuration ? (progress / activeDuration) * 100 : 0;
 
   return (
     <div className="w-full space-y-8">
       <div className="space-y-3">
         <div className="flex items-center justify-between font-readout text-sm font-bold text-muted">
           <span>{formatTime(progress)}</span>
-          <span>{formatTime(currentTrack.durationSeconds)}</span>
+          <span>{formatTime(activeDuration)}</span>
         </div>
         <input
           type="range"
           min={0}
-          max={currentTrack.durationSeconds}
+          max={activeDuration}
           value={progress}
           onChange={(event) => setProgress(Number(event.target.value))}
           className="h-2 w-full cursor-pointer appearance-none rounded-full bg-surface-3 accent-primary"
@@ -98,7 +107,11 @@ export function PlayerControls({ wheel = false }: { wheel?: boolean }) {
         <div className="flex items-center justify-center gap-4">
           <button
             type="button"
-            className="grid h-12 w-12 place-items-center rounded-full text-muted transition hover:text-primary"
+            onClick={toggleShuffle}
+            className={cn(
+              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+              shuffleEnabled ? "bg-primary/10 text-primary" : "text-muted",
+            )}
             aria-label="Mezclar"
           >
             <Shuffle className="h-5 w-5" aria-hidden="true" />
@@ -133,7 +146,11 @@ export function PlayerControls({ wheel = false }: { wheel?: boolean }) {
           </button>
           <button
             type="button"
-            className="grid h-12 w-12 place-items-center rounded-full text-muted transition hover:text-primary"
+            onClick={toggleRepeat}
+            className={cn(
+              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+              repeatEnabled ? "bg-primary/10 text-primary" : "text-muted",
+            )}
             aria-label="Repetir"
           >
             <Repeat className="h-5 w-5" aria-hidden="true" />
@@ -144,7 +161,11 @@ export function PlayerControls({ wheel = false }: { wheel?: boolean }) {
       <div className="flex items-center justify-center gap-5">
         <button
           type="button"
-          className="grid h-12 w-12 place-items-center rounded-full text-muted transition hover:text-primary"
+          onClick={toggleShuffle}
+          className={cn(
+            "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+            shuffleEnabled ? "bg-primary/10 text-primary" : "text-muted",
+          )}
           aria-label="Mezclar"
         >
           <Shuffle className="h-5 w-5" aria-hidden="true" />
@@ -166,11 +187,32 @@ export function PlayerControls({ wheel = false }: { wheel?: boolean }) {
         </button>
         <button
           type="button"
-          className="grid h-12 w-12 place-items-center rounded-full text-muted transition hover:text-primary"
+          onClick={toggleRepeat}
+          className={cn(
+            "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+            repeatEnabled ? "bg-primary/10 text-primary" : "text-muted",
+          )}
           aria-label="Repetir"
         >
           <Repeat className="h-5 w-5" aria-hidden="true" />
         </button>
+      </div>
+
+      <div className="mx-auto flex w-full max-w-sm items-center gap-3 rounded-full border border-line/50 bg-black/35 px-4 py-3">
+        <Volume2 className="h-5 w-5 text-primary" aria-hidden="true" />
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={(event) => setVolume(Number(event.target.value))}
+          className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-surface-3 accent-primary"
+          aria-label="Volumen"
+        />
+        <span className="w-10 text-right font-readout text-xs font-bold text-muted">
+          {Math.round(volume * 100)}%
+        </span>
       </div>
     </div>
   );

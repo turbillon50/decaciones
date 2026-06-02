@@ -11,6 +11,7 @@ export function MiniPlayer() {
     currentTrack,
     isPlaying,
     progress,
+    duration,
     togglePlay,
     nextTrack,
     previousTrack,
@@ -19,7 +20,7 @@ export function MiniPlayer() {
   } = usePlayer();
   const percent = Math.min(
     100,
-    Math.round((progress / currentTrack.durationSeconds) * 100),
+    Math.round((progress / (duration || currentTrack.durationSeconds)) * 100),
   );
 
   return (
@@ -55,7 +56,8 @@ export function MiniPlayer() {
             />
           </div>
           <p className="mt-1 font-readout text-[0.65rem] text-muted">
-            {formatTime(progress)} / {formatTime(currentTrack.durationSeconds)}
+            {formatTime(progress)} /{" "}
+            {formatTime(duration || currentTrack.durationSeconds)}
           </p>
         </div>
         <div className="flex items-center gap-1">

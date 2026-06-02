@@ -1,4 +1,4 @@
-const CACHE_NAME = "decaciones-v1";
+const CACHE_NAME = "decaciones-v2";
 const APP_SHELL = [
   "/",
   "/decades",
@@ -16,7 +16,16 @@ const APP_SHELL = [
   "/images/album-amber.svg",
   "/images/album-teal.svg",
   "/images/album-rose.svg",
-  "/images/vu-meters.svg"
+  "/images/vu-meters.svg",
+  "/audio/60s/demo.wav",
+  "/audio/70s/demo.wav",
+  "/audio/80s/demo.wav",
+  "/audio/90s/demo.wav",
+  "/audio/2000s/demo.wav",
+  "/audio/salsa/demo.wav",
+  "/audio/merengue/demo.wav",
+  "/audio/romanticas/demo.wav",
+  "/audio/electronica/demo.wav"
 ];
 
 self.addEventListener("install", (event) => {
