@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Album dorado">
+  <defs>
+    <radialGradient id="g" cx="52%" cy="42%" r="65%">
+      <stop offset="0" stop-color="#4a3512"/>
+      <stop offset="0.5" stop-color="#111"/>
+      <stop offset="1" stop-color="#050505"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <circle cx="300" cy="300" r="220" fill="#090909" stroke="#3b3328" stroke-width="16"/>
+  <circle cx="300" cy="300" r="154" fill="none" stroke="#26221d" stroke-width="28"/>
+  <circle cx="300" cy="300" r="48" fill="#e9c349"/>
+  <path d="M78 480c128-90 236-90 444 0" fill="none" stroke="#ffb77d" stroke-width="18" opacity="0.75"/>
+  <text x="300" y="112" fill="#ffb77d" font-family="Arial Black, Arial, sans-serif" font-size="42" text-anchor="middle">GOLD</text>
+</svg>

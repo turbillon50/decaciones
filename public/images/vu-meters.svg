@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" role="img" aria-label="Medidores analogicos">
+  <defs>
+    <linearGradient id="panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#292724"/>
+      <stop offset="1" stop-color="#090909"/>
+    </linearGradient>
+    <linearGradient id="meter" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#f4c06b"/>
+      <stop offset="1" stop-color="#3a220d"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="420" fill="url(#panel)"/>
+  <g opacity="0.35">
+    <path d="M0 78h900M0 142h900M0 206h900M0 270h900M0 334h900" stroke="#fff" stroke-width="1"/>
+  </g>
+  <g transform="translate(70 62)">
+    <rect width="310" height="188" rx="20" fill="url(#meter)" stroke="#5a3b1e" stroke-width="8"/>
+    <path d="M50 138c74-82 168-82 240 0" fill="none" stroke="#1a120c" stroke-width="5"/>
+    <path d="M155 154 92 84" stroke="#2b1710" stroke-width="8" stroke-linecap="round"/>
+    <text x="155" y="60" fill="#2b1710" font-family="Arial Black, Arial, sans-serif" font-size="28" text-anchor="middle">VU</text>
+  </g>
+  <g transform="translate(520 62)">
+    <rect width="310" height="188" rx="20" fill="url(#meter)" stroke="#5a3b1e" stroke-width="8"/>
+    <path d="M50 138c74-82 168-82 240 0" fill="none" stroke="#1a120c" stroke-width="5"/>
+    <path d="M155 154 228 96" stroke="#2b1710" stroke-width="8" stroke-linecap="round"/>
+    <text x="155" y="60" fill="#2b1710" font-family="Arial Black, Arial, sans-serif" font-size="28" text-anchor="middle">VU</text>
+  </g>
+  <circle cx="386" cy="330" r="32" fill="#101010" stroke="#4a4038" stroke-width="8"/>
+  <circle cx="472" cy="330" r="32" fill="#101010" stroke="#4a4038" stroke-width="8"/>
+  <circle cx="558" cy="330" r="32" fill="#101010" stroke="#4a4038" stroke-width="8"/>
+  <text x="70" y="350" fill="#e9c349" font-family="Arial Black, Arial, sans-serif" font-size="34">INSPIRACION DEL MOMENTO</text>
+  <text x="70" y="390" fill="#fff2e8" font-family="Arial Black, Arial, sans-serif" font-size="42">The Vinyl Sessions</text>
+</svg>

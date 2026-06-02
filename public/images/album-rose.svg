@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Album rose">
+  <rect width="600" height="600" fill="#080707"/>
+  <path d="M86 134c142-94 324-84 428 38v296H86z" fill="#171313" stroke="#5a332f" stroke-width="9"/>
+  <path d="M102 450c116-104 212-122 402-42" fill="none" stroke="#e36b6b" stroke-width="16" opacity="0.82"/>
+  <path d="M102 392c132-118 264-134 402-52" fill="none" stroke="#ffb77d" stroke-width="10" opacity="0.65"/>
+  <circle cx="300" cy="286" r="96" fill="#101010" stroke="#353535" stroke-width="12"/>
+  <circle cx="300" cy="286" r="24" fill="#e36b6b"/>
+  <text x="300" y="526" fill="#ffb77d" font-family="Arial Black, Arial, sans-serif" font-size="38" text-anchor="middle">ROCK</text>
+</svg>

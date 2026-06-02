@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-label="Decaciones iPod Classic y rockola">
+  <defs>
+    <radialGradient id="room" cx="52%" cy="38%" r="72%">
+      <stop offset="0" stop-color="#2b2927"/>
+      <stop offset="0.55" stop-color="#111"/>
+      <stop offset="1" stop-color="#050505"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#3a3936"/>
+      <stop offset="1" stop-color="#121212"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe088"/>
+      <stop offset="0.55" stop-color="#ffb77d"/>
+      <stop offset="1" stop-color="#ff8c00"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="900" fill="url(#room)"/>
+  <g opacity="0.18">
+    <circle cx="445" cy="450" r="360" fill="none" stroke="#fff" stroke-width="1"/>
+    <circle cx="445" cy="450" r="300" fill="none" stroke="#fff" stroke-width="1"/>
+    <circle cx="445" cy="450" r="240" fill="none" stroke="#fff" stroke-width="1"/>
+    <circle cx="445" cy="450" r="180" fill="none" stroke="#fff" stroke-width="1"/>
+  </g>
+  <ellipse cx="430" cy="724" rx="330" ry="58" fill="#000" opacity="0.62"/>
+  <circle cx="328" cy="384" r="180" fill="#080808" stroke="#3a3028" stroke-width="12"/>
+  <circle cx="328" cy="384" r="126" fill="none" stroke="#1d1d1d" stroke-width="24"/>
+  <circle cx="328" cy="384" r="42" fill="url(#amber)" filter="url(#glow)"/>
+  <rect x="428" y="178" width="238" height="414" rx="54" fill="url(#metal)" stroke="#5c4434" stroke-width="10"/>
+  <rect x="468" y="230" width="158" height="112" rx="16" fill="#080808" stroke="#e9c349" stroke-width="6"/>
+  <path d="M486 314h12v-48h14v48h14v-70h14v70h14v-58h14v58h14v-82h14v82" fill="none" stroke="#ffb77d" stroke-width="8"/>
+  <circle cx="547" cy="445" r="86" fill="#191919" stroke="#4c4a47" stroke-width="8"/>
+  <circle cx="547" cy="445" r="34" fill="#050505" stroke="#ffb77d" stroke-width="7"/>
+  <circle cx="547" cy="445" r="11" fill="#ffb77d"/>
+  <path d="M704 236c72 44 116 112 116 190s-44 146-116 190" fill="none" stroke="url(#amber)" stroke-width="22" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M732 294c38 34 60 78 60 126s-22 92-60 126" fill="none" stroke="#46d9c8" stroke-width="12" stroke-linecap="round" opacity="0.72"/>
+  <text x="450" y="710" fill="#ffb77d" font-family="Arial Black, Arial, sans-serif" font-size="70" font-weight="900" text-anchor="middle">DECACIONES</text>
+  <text x="450" y="754" fill="#e9c349" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle">LA MUSICA DE TU VIDA</text>
+</svg>

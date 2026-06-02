@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Album ambar">
+  <rect width="600" height="600" fill="#070606"/>
+  <rect x="54" y="54" width="492" height="492" rx="46" fill="#171412" stroke="#5b3820" stroke-width="8"/>
+  <g fill="#ff8c00" opacity="0.85">
+    <rect x="116" y="150" width="30" height="260" rx="15"/>
+    <rect x="172" y="104" width="30" height="352" rx="15"/>
+    <rect x="228" y="190" width="30" height="198" rx="15"/>
+    <rect x="284" y="126" width="30" height="326" rx="15"/>
+    <rect x="340" y="210" width="30" height="164" rx="15"/>
+    <rect x="396" y="168" width="30" height="246" rx="15"/>
+    <rect x="452" y="118" width="30" height="344" rx="15"/>
+  </g>
+  <circle cx="300" cy="300" r="82" fill="#0a0a0a" stroke="#ffb77d" stroke-width="10"/>
+  <text x="300" y="518" fill="#ffb77d" font-family="Arial Black, Arial, sans-serif" font-size="38" text-anchor="middle">SALON</text>
+</svg>
