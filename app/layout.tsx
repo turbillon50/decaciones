@@ -1,5 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Chivo, Inter, Space_Grotesk } from "next/font/google";
+import {
+  Bebas_Neue,
+  Chivo,
+  Inter,
+  Playfair_Display,
+  Space_Grotesk,
+} from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
@@ -18,6 +24,22 @@ const chivo = Chivo({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Headlines elegantes para las decadas (Cover Flow / heroes).
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  display: "swap",
+});
+
+// Numeros y anios con impacto retro.
+const bebas = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -56,7 +78,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} h-full dark`}
+      className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
     >
       <body className="min-h-full antialiased">
         <AppShell>{children}</AppShell>

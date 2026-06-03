@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { ListMusic, Volume2 } from "lucide-react";
 import { PlayerControls } from "@/components/PlayerControls";
 import { usePlayer } from "@/lib/player-store";
@@ -12,8 +13,17 @@ export default function PlayerPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-28 pt-24 sm:px-6 lg:grid lg:grid-cols-[1fr_24rem] lg:items-start lg:pb-16">
       <section className="space-y-7">
         <div className="relative mx-auto aspect-square w-full max-w-md rounded-3xl p-3 metal-panel">
-          <div className="absolute inset-10 rounded-full bg-primary/15 blur-3xl" />
-          <div className="relative h-full overflow-hidden rounded-2xl border border-line/60 bg-black">
+          <div className="absolute inset-10 rounded-full bg-primary/20 blur-3xl" />
+          <motion.div
+            className="relative mx-auto h-full w-full overflow-hidden rounded-full border-4 border-black bg-black shadow-2xl"
+            animate={{ rotate: isPlaying ? 360 : 0 }}
+            transition={
+              isPlaying
+                ? { repeat: Infinity, duration: 8, ease: "linear" }
+                : { duration: 0.5, ease: "easeOut" }
+            }
+            style={{ willChange: "transform" }}
+          >
             <Image
               src={currentTrack.cover}
               alt={`${currentTrack.title} album art`}
@@ -22,22 +32,39 @@ export default function PlayerPage() {
               sizes="(max-width: 768px) 90vw, 420px"
               className="object-cover"
             />
-            {isPlaying ? (
-              <div
-                className="vinyl-disc animate-slow-spin absolute bottom-5 right-5 h-20 w-20 rounded-full opacity-90 shadow-2xl"
-                aria-hidden="true"
-              />
-            ) : null}
-          </div>
+            <div
+              className="absolute inset-0 rounded-full [background:repeating-radial-gradient(circle,rgba(0,0,0,0.16)_0_2px,transparent_2px_9px)]"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-black bg-primary/90 shadow-inner"
+              aria-hidden="true"
+            />
+          </motion.div>
         </div>
 
         <div className="mx-auto max-w-md space-y-2 text-center">
-          <h1 className="font-display text-3xl font-black text-foreground">
+          <h1 className="font-headline text-3xl font-black text-foreground">
             {currentTrack.title}
           </h1>
           <p className="text-xl text-primary">
             {currentTrack.artist} - {currentTrack.album} ({currentTrack.year})
           </p>
+        </div>
+
+        {/* Waveform animado */}
+        <div className="mx-auto flex h-8 max-w-md items-center justify-center gap-1">
+          {Array.from({ length: 32 }).map((_, i) => (
+            <span
+              key={i}
+              className="waveform-bar"
+              style={{
+                animationDelay: `${(i % 8) * 0.09}s`,
+                animationPlayState: isPlaying ? "running" : "paused",
+                opacity: isPlaying ? 1 : 0.4,
+              }}
+            />
+          ))}
         </div>
 
         <div className="mx-auto w-full max-w-md">

@@ -93,6 +93,19 @@ a {
   letter-spacing: 0;
 }
 
+/* Headlines elegantes (serif) para decadas y heroes premium. */
+.font-headline {
+  font-family: var(--font-playfair), Georgia, ui-serif, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Numeros / anios con impacto retro. */
+.font-year {
+  font-family: var(--font-bebas), var(--font-space-grotesk), ui-sans-serif,
+    sans-serif;
+  letter-spacing: 0.04em;
+}
+
 .metal-panel {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 20%),
@@ -169,6 +182,60 @@ a {
 
 .animate-slow-spin {
   animation: slow-spin 24s linear infinite;
+}
+
+/* ---------- Cover Flow 3D ---------- */
+.coverflow-stage {
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+
+.coverflow-track {
+  transform-style: preserve-3d;
+}
+
+/* Reflejo bajo cada portada del cover flow. */
+.coverflow-reflection {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.42),
+    transparent 62%
+  );
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 62%);
+  transform: scaleY(-1);
+  opacity: 0.4;
+}
+
+/* ---------- Waveform animado del player ---------- */
+.waveform-bar {
+  width: 0.32rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--gold), var(--amber));
+  animation: waveform 1s ease-in-out infinite;
+}
+
+/* ---------- Particulas doradas del hero ---------- */
+@keyframes float-particle {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-120px) translateX(var(--drift, 12px));
+    opacity: 0;
+  }
+}
+
+.golden-particle {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 183, 125, 0.9), transparent 70%);
+  animation: float-particle var(--life, 9s) linear infinite;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

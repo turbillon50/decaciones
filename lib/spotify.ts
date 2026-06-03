@@ -158,6 +158,180 @@ export async function searchTracks(
   return parseSpotifyResponse<SpotifySearchTracksResponse>(response);
 }
 
+export type SpotifyDecade = "60s" | "70s" | "80s" | "90s" | "2000s";
+
+const decadeYearRanges: Record<SpotifyDecade, [number, number]> = {
+  "60s": [1960, 1969],
+  "70s": [1970, 1979],
+  "80s": [1980, 1989],
+  "90s": [1990, 1999],
+  "2000s": [2000, 2009],
+};
+
+export function decadeToYearFilter(decade?: string): string {
+  if (!decade || !(decade in decadeYearRanges)) return "";
+  const [from, to] = decadeYearRanges[decade as SpotifyDecade];
+  return `year:${from}-${to}`;
+}
+
+export type SpotifySearchTrack = {
+  id: string;
+  uri: string;
+  name: string;
+  artists: string[];
+  album: string;
+  year: string;
+  image: string | null;
+  previewUrl: string | null;
+  spotifyUrl: string;
+};
+
+export type SpotifySearchResults = {
+  tracks: SpotifySearchTrack[];
+  albums: Array<{
+    id: string;
+    name: string;
+    artists: string[];
+    year: string;
+    image: string | null;
+    spotifyUrl: string;
+  }>;
+  artists: Array<{
+    id: string;
+    name: string;
+    image: string | null;
+    spotifyUrl: string;
+  }>;
+};
+
+type SpotifySearchRawResponse = {
+  tracks?: {
+    items: Array<{
+      id: string;
+      uri: string;
+      name: string;
+      preview_url: string | null;
+      artists: Array<{ name: string }>;
+      album: {
+        name: string;
+        release_date: string;
+        images: Array<{ url: string }>;
+      };
+      external_urls: { spotify: string };
+    }>;
+  };
+  albums?: {
+    items: Array<{
+      id: string;
+      name: string;
+      release_date: string;
+      artists: Array<{ name: string }>;
+      images: Array<{ url: string }>;
+      external_urls: { spotify: string };
+    }>;
+  };
+  artists?: {
+    items: Array<{
+      id: string;
+      name: string;
+      images: Array<{ url: string }>;
+      external_urls: { spotify: string };
+    }>;
+  };
+};
+
+const year = (date?: string) => (date ? date.slice(0, 4) : "");
+
+export async function searchSpotify(
+  accessToken: string,
+  query: string,
+  {
+    types = ["track", "album", "artist"],
+    decade,
+    limit = 12,
+  }: {
+    types?: Array<"track" | "album" | "artist">;
+    decade?: string;
+    limit?: number;
+  } = {},
+): Promise<SpotifySearchResults> {
+  const yearFilter = decadeToYearFilter(decade);
+  const q = yearFilter ? `${query} ${yearFilter}` : query;
+
+  const params = new URLSearchParams({
+    q,
+    type: types.join(","),
+    limit: String(Math.min(Math.max(limit, 1), 50)),
+  });
+
+  const response = await fetch(`${apiBaseUrl}/search?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await parseSpotifyResponse<SpotifySearchRawResponse>(response);
+
+  return {
+    tracks: (data.tracks?.items ?? []).map((t) => ({
+      id: t.id,
+      uri: t.uri,
+      name: t.name,
+      artists: t.artists.map((a) => a.name),
+      album: t.album.name,
+      year: year(t.album.release_date),
+      image: t.album.images?.[0]?.url ?? null,
+      previewUrl: t.preview_url,
+      spotifyUrl: t.external_urls.spotify,
+    })),
+    albums: (data.albums?.items ?? []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      artists: a.artists.map((x) => x.name),
+      year: year(a.release_date),
+      image: a.images?.[0]?.url ?? null,
+      spotifyUrl: a.external_urls.spotify,
+    })),
+    artists: (data.artists?.items ?? []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      image: a.images?.[0]?.url ?? null,
+      spotifyUrl: a.external_urls.spotify,
+    })),
+  };
+}
+
+type SpotifyTrackDetailRaw = {
+  id: string;
+  uri: string;
+  name: string;
+  preview_url: string | null;
+  duration_ms: number;
+  artists: Array<{ name: string }>;
+  album: {
+    name: string;
+    release_date: string;
+    images: Array<{ url: string }>;
+  };
+  external_urls: { spotify: string };
+};
+
+export async function getTrack(accessToken: string, id: string) {
+  const response = await fetch(`${apiBaseUrl}/tracks/${id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const t = await parseSpotifyResponse<SpotifyTrackDetailRaw>(response);
+  return {
+    id: t.id,
+    uri: t.uri,
+    name: t.name,
+    artists: t.artists.map((a) => a.name),
+    album: t.album.name,
+    year: year(t.album.release_date),
+    image: t.album.images?.[0]?.url ?? null,
+    previewUrl: t.preview_url,
+    durationMs: t.duration_ms,
+    spotifyUrl: t.external_urls.spotify,
+  };
+}
+
 export async function createPlaylist(
   accessToken: string,
   userId: string,
