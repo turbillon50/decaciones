@@ -21,11 +21,12 @@ export type Track = {
   album: string;
   year: number;
   decade: DecadeId;
-  genre: GenreId;
+  genre: GenreId | (string & {});
   durationSeconds: number;
   cover: string;
   audioSrc?: string;
   spotifyQuery: string;
+  spotifyUri?: string;
 };
 
 export type Decade = {

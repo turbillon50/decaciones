@@ -1,20 +1,22 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Sparkles } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import { LogIn, Music, Sparkles } from "lucide-react";
 import { DecadeCard } from "@/components/DecadeCard";
 import { GenreCard } from "@/components/GenreCard";
 import { GoldenParticles } from "@/components/GoldenParticles";
 import { PlaylistCard } from "@/components/PlaylistCard";
-import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
 import { decades, genres, playlists } from "@/data/music";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  // Si ya hay sesion de Spotify, ir directo a la biblioteca por decadas.
+  // Si ya hay sesion (Clerk) o conexion de Spotify, ir directo a la biblioteca.
+  const { userId } = await auth();
   const cookieStore = await cookies();
-  if (cookieStore.get("spotify_access_token")?.value) {
+  if (userId || cookieStore.get("spotify_access_token")?.value) {
     redirect("/decades");
   }
 
@@ -36,17 +38,36 @@ export default async function Home() {
               y deja que la rockola haga el resto.
             </p>
           </div>
-          <SpotifyConnectButton />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <a
+              href="/api/auth/spotify"
+              className="inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#1DB954] px-7 text-base font-black text-black transition hover:brightness-110"
+            >
+              <Music className="h-5 w-5" aria-hidden="true" />
+              Conectar con Spotify
+            </a>
+            <Link
+              href="/sign-in"
+              className="metal-button inline-flex h-14 items-center justify-center gap-3 rounded-full px-7 text-base font-black text-primary"
+            >
+              <LogIn className="h-5 w-5" aria-hidden="true" />
+              Entrar
+            </Link>
+          </div>
         </div>
-        <div className="metal-panel overflow-hidden rounded-2xl p-4">
-          <div className="relative aspect-square rounded-xl border border-line/40 bg-black">
+        <div className="metal-panel relative overflow-hidden rounded-2xl p-4">
+          <div className="relative grid aspect-square place-items-center rounded-xl border border-line/40 bg-black">
             <Image
               src="/images/decaciones-hero.svg"
               alt="Decaciones iPod Classic y rockola"
               fill
               priority
               sizes="(max-width: 1024px) 90vw, 352px"
-              className="rounded-xl object-cover"
+              className="rounded-xl object-cover opacity-70"
+            />
+            <div
+              className="vinyl-disc animate-slow-spin relative h-40 w-40 rounded-full shadow-2xl"
+              aria-hidden="true"
             />
           </div>
         </div>

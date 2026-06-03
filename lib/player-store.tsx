@@ -148,6 +148,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           : [track];
       setQueue(usableQueue);
       playAudioTrack(track, true);
+
+      // Registro de historial (no-op si no hay sesion de Clerk / DB).
+      void fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          trackId: track.id,
+          spotifyUri: track.spotifyUri,
+          trackName: track.title,
+          artist: track.artist,
+          decade: track.decade,
+          genre: track.genre,
+        }),
+      }).catch(() => {});
     },
     [playAudioTrack],
   );

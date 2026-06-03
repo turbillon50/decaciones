@@ -12,6 +12,8 @@ export type CoverFlowItem = {
   /** Subtitulo / headline corto. */
   subtitle?: string;
   accent: "gold" | "amber" | "teal" | "rose";
+  /** Clases de gradiente Tailwind (override del accent). */
+  gradient?: string;
 };
 
 const accentGradient: Record<CoverFlowItem["accent"], string> = {
@@ -34,7 +36,7 @@ function Artwork({ item }: { item: CoverFlowItem }) {
     <div
       className={cn(
         "relative h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br",
-        accentGradient[item.accent],
+        item.gradient ?? accentGradient[item.accent],
       )}
     >
       <div className="absolute inset-0 opacity-30 [background:repeating-radial-gradient(circle_at_70%_30%,rgba(0,0,0,0.55)_0_2px,transparent_2px_9px)]" />

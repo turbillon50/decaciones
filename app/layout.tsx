@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import {
   Bebas_Neue,
   Chivo,
@@ -76,13 +77,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#ff8c00",
+          colorBackground: "#0d0d0d",
+          colorText: "#f2e7df",
+          colorInputBackground: "#1a1918",
+          borderRadius: "0.9rem",
+        },
+      }}
     >
-      <body className="min-h-full antialiased">
-        <AppShell>{children}</AppShell>
-      </body>
-    </html>
+      <html
+        lang="es"
+        className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
+      >
+        <body className="min-h-full antialiased">
+          <AppShell>{children}</AppShell>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

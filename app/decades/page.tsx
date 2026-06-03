@@ -12,12 +12,14 @@ import {
   StaggerItem,
 } from "@/components/motion";
 import { decades, playlists } from "@/data/music";
+import { decadeMeta } from "@/data/decades-meta";
 
-const coverItems: CoverFlowItem[] = decades.map((decade) => ({
-  id: decade.id,
-  title: decade.label,
-  subtitle: decade.headline,
-  accent: decade.accent,
+const coverItems: CoverFlowItem[] = decadeMeta.map((meta) => ({
+  id: meta.id,
+  title: meta.label,
+  subtitle: meta.epoch,
+  accent: meta.accent,
+  gradient: meta.gradient,
 }));
 
 export default function DecadesPage() {

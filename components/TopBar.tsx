@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, Settings } from "lucide-react";
+import { useAuth, UserButton } from "@clerk/nextjs";
+import { ArrowLeft, LogIn, Settings } from "lucide-react";
 
 const titles: Record<string, string> = {
   "/": "DECACIONES",
@@ -18,6 +19,7 @@ const titles: Record<string, string> = {
 export function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isSignedIn } = useAuth();
   const isHome = pathname === "/";
 
   return (
@@ -37,13 +39,26 @@ export function TopBar() {
         >
           {titles[pathname] ?? "DECACIONES"}
         </Link>
-        <Link
-          href="/settings"
-          className="metal-button grid h-11 w-11 place-items-center rounded-full text-muted transition hover:text-primary"
-          aria-label="Abrir ajustes"
-        >
-          <Settings className="h-5 w-5" aria-hidden="true" />
-        </Link>
+        <div className="flex items-center gap-2">
+          {isSignedIn ? (
+            <UserButton appearance={{ elements: { avatarBox: "h-9 w-9" } }} />
+          ) : (
+            <Link
+              href="/sign-in"
+              className="metal-button grid h-11 w-11 place-items-center rounded-full text-muted transition hover:text-primary"
+              aria-label="Entrar"
+            >
+              <LogIn className="h-5 w-5" aria-hidden="true" />
+            </Link>
+          )}
+          <Link
+            href="/settings"
+            className="metal-button grid h-11 w-11 place-items-center rounded-full text-muted transition hover:text-primary"
+            aria-label="Abrir ajustes"
+          >
+            <Settings className="h-5 w-5" aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </header>
   );

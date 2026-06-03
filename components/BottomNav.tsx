@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Disc3, Home, LibraryBig, Search, Settings } from "lucide-react";
+import { Heart, Home, LibraryBig, Search, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/", label: "Inicio", icon: Home },
   { href: "/decades", label: "Decadas", icon: LibraryBig },
   { href: "/search", label: "Buscar", icon: Search },
-  { href: "/spotify", label: "Playlists", icon: Disc3 },
+  { href: "/favorites", label: "Favoritos", icon: Heart },
   { href: "/settings", label: "Config", icon: Settings },
 ];
 

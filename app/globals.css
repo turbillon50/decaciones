@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 :root {
+  /* Tokens de marca Decaciones */
+  --dec-black: #050505;
+  --dec-gunmetal: #1a1918;
+  --dec-gold: #e9c349;
+  --dec-amber: #ff8c00;
+  --dec-warm: #ffb77d;
+  --dec-teal: #46d9c8;
+
   --background: #050505;
   --foreground: #f2e7df;
   --surface: #111111;
