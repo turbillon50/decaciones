@@ -1,25 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  Heart,
-  ListMusic,
-  ListPlus,
-  Loader2,
-  Music2,
-  Repeat,
-  Shuffle,
-  Volume2,
-} from "lucide-react";
+import { Disc3, LibraryBig, ListPlus, Loader2, Music2 } from "lucide-react";
 import { IpodPlayer } from "@/components/IpodPlayer";
 import { SlideIn } from "@/components/motion";
 import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
-import { cn } from "@/lib/utils";
 import type { SpotifySearchResults } from "@/lib/spotify";
 import { spotifyTrackToTrack } from "@/lib/spotify-map";
-import { usePlayer } from "@/lib/player-store";
 import type { DecadeId, Track } from "@/lib/types";
 
 const validDecades: DecadeId[] = ["60s", "70s", "80s", "90s", "2000s"];
@@ -34,23 +24,48 @@ export function PlayerExperience() {
   const spotifyMode = Boolean(genre && decade);
   const playback = useSpotifyPlayback();
 
-  const {
-    queue,
-    playTrack,
-    shuffleEnabled,
-    repeatEnabled,
-    toggleShuffle,
-    toggleRepeat,
-    toggleFavorite,
-    isFavorite,
-  } = usePlayer();
-
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notConnected, setNotConnected] = useState(false);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<{ url: string } | null>(null);
+
+  useEffect(() => {
+    if (!spotifyMode || !genre || !decade) return;
+    let active = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      setNotConnected(false);
+      try {
+        const res = await fetch(
+          `/api/spotify/search?q=${encodeURIComponent(genre)}&decade=${decade}`,
+        );
+        const payload = await res.json();
+        if (res.status === 401) {
+          if (active) setNotConnected(true);
+          return;
+        }
+        if (!res.ok) throw new Error(payload.error ?? "Error de busqueda");
+        const data = payload.results as SpotifySearchResults;
+        const mapped = data.tracks.map((t) =>
+          spotifyTrackToTrack(t, decade, genre),
+        );
+        if (active) setResults(mapped);
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : "Error");
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [spotifyMode, genre, decade]);
 
   function playFrom(track: Track) {
     const idx = results.findIndex((r) => r.id === track.id);
@@ -85,43 +100,6 @@ export function PlayerExperience() {
     }
   }
 
-  useEffect(() => {
-    if (!spotifyMode || !genre || !decade) return;
-    let active = true;
-
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      setNotConnected(false);
-      try {
-        const res = await fetch(
-          `/api/spotify/search?q=${encodeURIComponent(genre)}&decade=${decade}`,
-        );
-        const payload = await res.json();
-        if (res.status === 401) {
-          if (active) setNotConnected(true);
-          return;
-        }
-        if (!res.ok) throw new Error(payload.error ?? "Error de busqueda");
-        const data = payload.results as SpotifySearchResults;
-        const mapped = data.tracks.map((t) =>
-          spotifyTrackToTrack(t, decade, genre),
-        );
-        if (active) setResults(mapped);
-      } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : "Error");
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-
-    void load();
-
-    return () => {
-      active = false;
-    };
-  }, [spotifyMode, genre, decade]);
-
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-28 pt-24 sm:px-6 lg:grid lg:grid-cols-[1fr_24rem] lg:items-start lg:pb-16">
       <section className="space-y-7">
@@ -138,46 +116,12 @@ export function PlayerExperience() {
 
         <IpodPlayer />
 
-        {/* Controles secundarios */}
-        <div className="mx-auto flex max-w-[22rem] items-center justify-center gap-4">
-          <button
-            type="button"
-            onClick={toggleShuffle}
-            className={cn(
-              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
-              shuffleEnabled ? "bg-primary/10 text-primary" : "text-muted",
-            )}
-            aria-label="Mezclar"
-          >
-            <Shuffle className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => toggleFavorite()}
-            className={cn(
-              "metal-button grid h-14 w-14 place-items-center rounded-full transition",
-              isFavorite() ? "text-primary" : "text-muted",
-            )}
-            aria-label="Favorita"
-          >
-            <Heart
-              className="h-6 w-6"
-              fill={isFavorite() ? "currentColor" : "none"}
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
-            onClick={toggleRepeat}
-            className={cn(
-              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
-              repeatEnabled ? "bg-primary/10 text-primary" : "text-muted",
-            )}
-            aria-label="Repetir"
-          >
-            <Repeat className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
+        {playback.premiumRequired ? (
+          <p className="mx-auto max-w-[22rem] text-center text-xs leading-5 text-muted">
+            La reproduccion dentro de la app requiere Spotify Premium. Sin
+            Premium abrimos la cancion en Spotify.
+          </p>
+        ) : null}
       </section>
 
       <aside className="space-y-5">
@@ -233,7 +177,6 @@ export function PlayerExperience() {
                         </span>
                         <span className="block truncate text-xs text-muted">
                           {track.artist}
-                          {track.audioSrc ? "" : " · sin preview"}
                         </span>
                       </span>
                     </button>
@@ -271,42 +214,31 @@ export function PlayerExperience() {
             ) : null}
           </SlideIn>
         ) : (
-          <>
-            <section className="rounded-2xl p-5 metal-panel">
-              <div className="flex items-center gap-3 text-primary">
-                <Volume2 className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-headline text-xl font-black">Salida</h2>
-              </div>
-              <div className="mt-5 rounded-full border border-line/60 bg-black/40 px-4 py-3 font-readout text-sm font-bold text-muted">
-                Salon principal
-              </div>
-            </section>
-            <section className="rounded-2xl p-5 metal-panel">
-              <div className="flex items-center gap-3 text-primary">
-                <ListMusic className="h-5 w-5" aria-hidden="true" />
-                <h2 className="font-headline text-xl font-black">Cola actual</h2>
-              </div>
-              <ol className="mt-5 space-y-3">
-                {queue.map((track, index) => (
-                  <li
-                    key={`${track.id}-${index}`}
-                    className="flex items-center justify-between gap-3 rounded-xl bg-surface-2/70 px-3 py-3 text-sm text-muted"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => playTrack(track, queue)}
-                      className="min-w-0 flex-1 truncate text-left transition hover:text-primary"
-                    >
-                      {track.title} - {track.artist}
-                    </button>
-                    <span className="font-readout text-gold">
-                      {(index + 1).toString().padStart(2, "0")}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          </>
+          <SlideIn from="right" className="space-y-3 rounded-2xl p-6 metal-panel">
+            <h2 className="font-headline text-xl font-black text-foreground">
+              Tu rockola
+            </h2>
+            <p className="text-sm leading-6 text-muted">
+              Elige una decada y un genero, o busca cualquier cancion para
+              reproducirla aqui.
+            </p>
+            <div className="flex flex-col gap-3 pt-2">
+              <Link
+                href="/decades"
+                className="metal-button inline-flex h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-black text-primary"
+              >
+                <LibraryBig className="h-4 w-4" aria-hidden="true" />
+                Explorar decadas
+              </Link>
+              <Link
+                href="/search"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line/60 px-5 text-sm font-black text-muted transition hover:text-primary"
+              >
+                <Disc3 className="h-4 w-4" aria-hidden="true" />
+                Buscar canciones
+              </Link>
+            </div>
+          </SlideIn>
         )}
       </aside>
     </main>
@@ -316,12 +248,7 @@ export function PlayerExperience() {
 export function PlayerSkeleton() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-28 pt-24 sm:px-6">
-      <div className="mx-auto aspect-square w-full max-w-md animate-pulse rounded-full bg-surface-2/70">
-        <div className="flex h-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
-        </div>
-      </div>
-      <div className="mx-auto h-8 w-48 animate-pulse rounded-full bg-surface-2/70" />
+      <div className="mx-auto aspect-square w-full max-w-[22rem] animate-pulse rounded-[2.4rem] bg-surface-2/70" />
     </main>
   );
 }
