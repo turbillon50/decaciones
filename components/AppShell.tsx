@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { PWAInstaller } from "@/components/PWAInstaller";
 import { TopBar } from "@/components/TopBar";
+import { PageTransition } from "@/components/motion";
 import { PlayerProvider } from "@/lib/player-store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -16,7 +17,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="app-texture" aria-hidden="true" />
       <div className="flex min-h-dvh flex-col">
         <TopBar />
-        {children}
+        <PageTransition>{children}</PageTransition>
         {showMiniPlayer ? <MiniPlayer /> : null}
         <BottomNav />
         <PWAInstaller />

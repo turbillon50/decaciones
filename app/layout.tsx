@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Chivo, Inter, Space_Grotesk } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
+import {
+  Bebas_Neue,
+  Chivo,
+  Inter,
+  Playfair_Display,
+  Space_Grotesk,
+} from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
@@ -18,6 +25,22 @@ const chivo = Chivo({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Headlines elegantes para las decadas (Cover Flow / heroes).
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  display: "swap",
+});
+
+// Numeros y anios con impacto retro.
+const bebas = Bebas_Neue({
+  variable: "--font-bebas",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -54,13 +77,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} h-full dark`}
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#ff8c00",
+          colorBackground: "#0d0d0d",
+          colorText: "#f2e7df",
+          colorInputBackground: "#1a1918",
+          borderRadius: "0.9rem",
+        },
+      }}
     >
-      <body className="min-h-full antialiased">
-        <AppShell>{children}</AppShell>
-      </body>
-    </html>
+      <html
+        lang="es"
+        className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
+      >
+        <body className="min-h-full antialiased">
+          <AppShell>{children}</AppShell>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

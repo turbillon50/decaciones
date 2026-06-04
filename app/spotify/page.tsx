@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -11,6 +12,7 @@ import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
 import { SpotifyPlaylistCreator } from "@/components/SpotifyPlaylistCreator";
 import { decades, genres, playlists } from "@/data/music";
 import { getCurrentSpotifyUser } from "@/lib/spotify";
+import { saveSpotifyTokens } from "@/lib/users";
 
 export const metadata: Metadata = {
   title: "Conectar Spotify",
@@ -42,6 +44,19 @@ async function getSpotifyConnection(): Promise<SpotifyConnection> {
 
   try {
     const user = await getCurrentSpotifyUser(accessToken);
+
+    // Si hay sesion de Clerk, guardamos los tokens de Spotify en la DB
+    // asociados al usuario (no-op si no hay DB configurada).
+    try {
+      const { userId } = await auth();
+      if (userId) {
+        const refreshToken = cookieStore.get("spotify_refresh_token")?.value;
+        await saveSpotifyTokens(userId, accessToken, refreshToken);
+      }
+    } catch {
+      /* persistencia best-effort */
+    }
+
     return {
       isConnected: true,
       displayName: user.display_name || user.id || "Spotify",

@@ -27,7 +27,7 @@ type PlayerContextValue = {
   togglePlay: () => void;
   nextTrack: () => void;
   previousTrack: () => void;
-  toggleFavorite: (trackId?: string) => void;
+  toggleFavorite: (trackId?: string, track?: Track) => void;
   isFavorite: (trackId?: string) => boolean;
   setProgress: (value: number) => void;
   setVolume: (value: number) => void;
@@ -148,6 +148,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           : [track];
       setQueue(usableQueue);
       playAudioTrack(track, true);
+
+      // Registro de historial (no-op si no hay sesion de Clerk / DB).
+      void fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          trackId: track.id,
+          spotifyUri: track.spotifyUri,
+          trackName: track.title,
+          artist: track.artist,
+          decade: track.decade,
+          genre: track.genre,
+        }),
+      }).catch(() => {});
     },
     [playAudioTrack],
   );
@@ -181,7 +196,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleFavorite = useCallback(
-    (trackId = currentTrack.id) => {
+    (trackId = currentTrack.id, track?: Track) => {
+      const willFavorite = !favorites.has(trackId);
       setFavorites((current) => {
         const next = new Set(current);
         if (next.has(trackId)) {
@@ -191,8 +207,30 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
         return next;
       });
+
+      // Sincroniza con la cuenta (no-op sin sesion de Clerk / DB).
+      const meta =
+        track ?? (trackId === currentTrack.id ? currentTrack : undefined);
+      const uri = meta?.spotifyUri ?? meta?.id ?? trackId;
+      if (willFavorite) {
+        void fetch("/api/favorites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          keepalive: true,
+          body: JSON.stringify({
+            spotifyUri: uri,
+            trackName: meta?.title,
+            artist: meta?.artist,
+          }),
+        }).catch(() => {});
+      } else {
+        void fetch(`/api/favorites?uri=${encodeURIComponent(uri)}`, {
+          method: "DELETE",
+          keepalive: true,
+        }).catch(() => {});
+      }
     },
-    [currentTrack.id],
+    [currentTrack, favorites],
   );
 
   const isFavorite = useCallback(
