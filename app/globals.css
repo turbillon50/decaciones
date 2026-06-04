@@ -113,6 +113,106 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ---------- Fondo cinematografico animado ---------- */
+.cinematic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.cinematic-bg::before,
+.cinematic-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+.cinematic-bg::before {
+  width: 62vmax;
+  height: 62vmax;
+  left: -12vmax;
+  top: -22vmax;
+  background: radial-gradient(circle, var(--amber), transparent 60%);
+  animation: drift1 24s ease-in-out infinite alternate;
+}
+.cinematic-bg::after {
+  width: 56vmax;
+  height: 56vmax;
+  right: -16vmax;
+  bottom: -22vmax;
+  background: radial-gradient(circle, var(--teal), transparent 60%);
+  animation: drift2 28s ease-in-out infinite alternate;
+}
+.cinematic-blob {
+  position: absolute;
+  width: 48vmax;
+  height: 48vmax;
+  left: 28vw;
+  top: 38vh;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.38;
+  background: radial-gradient(circle, var(--gold), transparent 60%);
+  animation: drift3 32s ease-in-out infinite alternate;
+}
+@keyframes drift1 {
+  to {
+    transform: translate(22vw, 16vh) scale(1.25);
+  }
+}
+@keyframes drift2 {
+  to {
+    transform: translate(-16vw, -12vh) scale(1.18);
+  }
+}
+@keyframes drift3 {
+  to {
+    transform: translate(-22vw, 12vh) scale(1.32);
+  }
+}
+.cinematic-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 38%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+:root.light .cinematic-vignette {
+  background: radial-gradient(
+    circle at 50% 38%,
+    transparent 52%,
+    rgba(60, 40, 10, 0.12) 100%
+  );
+}
+:root.light .cinematic-bg::before,
+:root.light .cinematic-bg::after,
+:root.light .cinematic-blob {
+  opacity: 0.28;
+}
+
+/* Rails horizontales tipo Apple TV: ocultar scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.glow-card {
+  border: 1px solid var(--line-soft);
+  box-shadow:
+    0 36px 90px var(--shadow),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 ::selection {
   background: rgba(255, 183, 125, 0.32);
   color: #fff6ea;
