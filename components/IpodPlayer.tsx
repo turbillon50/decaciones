@@ -38,7 +38,7 @@ export function IpodPlayer() {
         }}
       >
         {/* Pantalla */}
-        <div className="relative min-h-[11rem] overflow-hidden rounded-2xl border border-black/40 bg-gradient-to-b from-[#0c1410] to-[#05080a] p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.8)]">
+        <div className="relative min-h-[11rem] overflow-hidden rounded-2xl border border-black/40 bg-gradient-to-b from-[#140d22] to-[#08060f] p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.8)]">
           <div className="pointer-events-none absolute inset-0 opacity-30 [background:linear-gradient(120deg,rgba(255,255,255,0.12),transparent_40%)]" />
           <div className="flex items-center justify-between font-readout text-[0.62rem] font-bold uppercase tracking-widest text-teal/80">
             <span>Decaciones</span>
@@ -70,7 +70,7 @@ export function IpodPlayer() {
                   <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black bg-teal/80" />
                 </motion.div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-headline text-base font-black text-[#dffaf2]">
+                  <p className="truncate font-headline text-base font-black text-[#efeafa]">
                     {np.name}
                   </p>
                   <p className="truncate text-xs text-teal/70">{np.artist}</p>
@@ -97,7 +97,7 @@ export function IpodPlayer() {
             </>
           ) : (
             <div className="flex min-h-[8rem] flex-col items-center justify-center gap-3 text-center">
-              <p className="font-headline text-lg font-black text-[#dffaf2]">
+              <p className="font-headline text-lg font-black text-[#efeafa]">
                 Nada sonando
               </p>
               <p className="text-xs text-teal/60">

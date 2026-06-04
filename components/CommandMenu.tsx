@@ -4,31 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Check,
-  Disc3,
-  Heart,
-  Home,
-  LibraryBig,
-  ListPlus,
-  Loader2,
-  Music2,
-  Plus,
-  Search,
-  Settings,
-} from "lucide-react";
+import { Check, Loader2, Plus } from "lucide-react";
 import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
 
 const NAV = [
-  { href: "/decades", label: "Decadas", icon: LibraryBig },
-  { href: "/search", label: "Buscar", icon: Search },
-  { href: "/player", label: "iPod", icon: Disc3 },
-  { href: "/favorites", label: "Favoritos", icon: Heart },
-  { href: "/", label: "Inicio", icon: Home },
-  { href: "/settings", label: "Config", icon: Settings },
+  { href: "/decades", label: "Decadas" },
+  { href: "/search", label: "Buscar" },
+  { href: "/player", label: "Reproductor" },
+  { href: "/favorites", label: "Favoritos" },
+  { href: "/spotify", label: "Playlists" },
+  { href: "/", label: "Inicio" },
+  { href: "/settings", label: "Ajustes" },
 ];
 
-type UserPlaylist = { id: string; name: string; tracks: number };
+type UserPlaylist = { id: string; name: string };
 
 export function CommandMenu() {
   const pathname = usePathname();
@@ -36,13 +25,11 @@ export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<null | "create" | "add">(null);
 
-  // Crear playlist
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [doneUrl, setDoneUrl] = useState<string | null>(null);
   const [err, setErr] = useState("");
 
-  // Agregar a playlist
   const [playlists, setPlaylists] = useState<UserPlaylist[]>([]);
   const [loadingPl, setLoadingPl] = useState(false);
   const [addedTo, setAddedTo] = useState<string | null>(null);
@@ -65,7 +52,6 @@ export function CommandMenu() {
     setOpen(false);
     reset();
   }
-
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -130,7 +116,7 @@ export function CommandMenu() {
 
   return (
     <>
-      {/* Boton central */}
+      {/* Boton central — violeta sobrio */}
       <div
         className="fixed inset-x-0 bottom-0 z-50 flex justify-center"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 18px)", paddingTop: 12 }}
@@ -139,13 +125,13 @@ export function CommandMenu() {
           type="button"
           whileTap={{ scale: 0.84 }}
           onClick={() => (open ? close() : setOpen(true))}
-          aria-label={open ? "Cerrar" : "Acciones"}
+          aria-label={open ? "Cerrar" : "Menu"}
           className="relative flex h-16 w-16 items-center justify-center rounded-full"
           style={{
             background:
-              "linear-gradient(145deg, #ffb24d 0%, #ff8c00 55%, #e35d00 100%)",
+              "linear-gradient(150deg, #b9a3f5 0%, #8b5cf6 52%, #5b2ca8 100%)",
             boxShadow:
-              "0 0 0 1px rgba(255,255,255,0.22) inset, 0 0 34px rgba(255,140,0,0.6), 0 8px 24px rgba(0,0,0,0.45)",
+              "0 0 0 1px rgba(255,255,255,0.18) inset, 0 0 36px rgba(139,92,246,0.55), 0 8px 24px rgba(0,0,0,0.5)",
           }}
         >
           <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
@@ -153,7 +139,7 @@ export function CommandMenu() {
               className="absolute left-[15%] right-[15%] top-0 h-[55%] rounded-full"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.08) 55%, transparent 100%)",
+                  "linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.06) 55%, transparent 100%)",
               }}
             />
           </div>
@@ -162,7 +148,7 @@ export function CommandMenu() {
             transition={{ type: "spring", stiffness: 500, damping: 28 }}
             className="relative z-10"
           >
-            <Plus className="h-7 w-7 text-black/85" strokeWidth={2.6} aria-hidden="true" />
+            <Plus className="h-7 w-7 text-white" strokeWidth={2.2} aria-hidden="true" />
           </motion.div>
         </motion.button>
       </div>
@@ -174,42 +160,37 @@ export function CommandMenu() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.24 }}
               onClick={close}
               className="fixed inset-0 z-[60]"
               style={{
-                background: "rgba(6,6,6,0.5)",
-                backdropFilter: "blur(20px) saturate(160%) brightness(0.8)",
-                WebkitBackdropFilter: "blur(20px) saturate(160%) brightness(0.8)",
+                background: "rgba(5,3,10,0.55)",
+                backdropFilter: "blur(22px) saturate(150%) brightness(0.8)",
+                WebkitBackdropFilter: "blur(22px) saturate(150%) brightness(0.8)",
               }}
             />
 
             <motion.div
-              initial={{ opacity: 0, y: 60, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 60, scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 380, damping: 32 }}
-              className="fixed inset-x-4 z-[70] mx-auto max-w-md"
-              style={{ bottom: "max(env(safe-area-inset-bottom), 18px)", paddingBottom: 92 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ type: "spring", stiffness: 380, damping: 34 }}
+              className="fixed inset-x-5 z-[70] mx-auto max-w-sm"
+              style={{ bottom: "max(env(safe-area-inset-bottom), 18px)", paddingBottom: 94 }}
             >
-              {/* ---- ACCIONES ---- */}
-              <p className="mb-2 px-1 font-readout text-xs font-bold uppercase tracking-[0.3em] text-gold">
-                Acciones
-              </p>
-
+              {/* Crear playlist */}
               {panel === "create" ? (
-                <div className="mb-3 rounded-2xl border border-white/12 bg-white/[0.07] p-4 backdrop-blur">
+                <div className="space-y-3 border-t border-line/40 pt-5">
                   {doneUrl ? (
                     <div className="space-y-2 text-center">
-                      <Check className="mx-auto h-6 w-6 text-teal" aria-hidden="true" />
-                      <p className="text-sm text-foreground">Playlist creada.</p>
+                      <p className="text-sm text-muted">Playlist creada.</p>
                       <a
                         href={doneUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="block text-sm font-bold text-teal"
+                        className="text-sm font-medium text-primary"
                       >
-                        Abrir en Spotify ↗
+                        Abrir en Spotify
                       </a>
                     </div>
                   ) : (
@@ -218,129 +199,146 @@ export function CommandMenu() {
                         autoFocus
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Nombre de la playlist..."
-                        className="w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted/60"
+                        placeholder="Nombre de la playlist"
+                        className="w-full border-0 border-b border-line/60 bg-transparent pb-2 font-headline text-2xl text-foreground outline-none placeholder:text-muted/50"
                       />
-                      <button
-                        type="button"
-                        onClick={createPlaylist}
-                        disabled={busy || !name.trim()}
-                        className="metal-button mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-black text-primary disabled:opacity-50"
-                      >
-                        {busy ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                        ) : (
-                          <ListPlus className="h-4 w-4" aria-hidden="true" />
-                        )}
-                        Crear en Spotify
-                      </button>
+                      <div className="flex items-center gap-4 pt-1">
+                        <button
+                          type="button"
+                          onClick={createPlaylist}
+                          disabled={busy || !name.trim()}
+                          className="font-readout text-xs font-semibold uppercase tracking-[0.2em] text-primary disabled:opacity-40"
+                        >
+                          {busy ? "Creando…" : "Crear"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={reset}
+                          className="font-readout text-xs uppercase tracking-[0.2em] text-muted"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
                     </>
                   )}
-                  {err ? <p className="mt-2 text-xs text-rose">{err}</p> : null}
+                  {err ? <p className="text-xs text-rose">{err}</p> : null}
                 </div>
               ) : panel === "add" ? (
-                <div className="mb-3 max-h-64 overflow-y-auto rounded-2xl border border-white/12 bg-white/[0.07] p-3 backdrop-blur">
-                  <p className="px-1 pb-2 text-xs text-muted">
-                    Agregar <span className="font-bold text-foreground">{nowPlaying?.name}</span> a:
+                <div className="border-t border-line/40 pt-5">
+                  <p className="mb-3 text-xs text-muted">
+                    Agregar <span className="text-foreground">{nowPlaying?.name}</span> a
                   </p>
                   {loadingPl ? (
                     <div className="grid place-items-center py-6">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden="true" />
                     </div>
                   ) : playlists.length === 0 ? (
-                    <p className="px-1 py-3 text-xs text-muted">No tienes playlists todavia.</p>
+                    <p className="py-2 text-xs text-muted">No tienes playlists todavia.</p>
                   ) : (
-                    <ul className="space-y-1">
+                    <ul className="max-h-56 divide-y divide-line/30 overflow-y-auto">
                       {playlists.map((p) => (
                         <li key={p.id}>
                           <button
                             type="button"
                             onClick={() => addToPlaylist(p.id)}
                             disabled={busy}
-                            className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-foreground transition hover:bg-white/10 disabled:opacity-60"
+                            className="flex w-full items-center justify-between py-3 text-left text-[0.95rem] text-foreground transition disabled:opacity-50"
                           >
-                            <span className="truncate">{p.name}</span>
+                            <span className="truncate pr-3">{p.name}</span>
                             {addedTo === p.id ? (
-                              <Check className="h-4 w-4 shrink-0 text-teal" aria-hidden="true" />
-                            ) : (
-                              <Plus className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-                            )}
+                              <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                            ) : null}
                           </button>
                         </li>
                       ))}
                     </ul>
                   )}
-                  {err ? <p className="mt-1 px-1 text-xs text-rose">{err}</p> : null}
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="mt-3 font-readout text-xs uppercase tracking-[0.2em] text-muted"
+                  >
+                    Volver
+                  </button>
                 </div>
               ) : (
-                <div className="mb-3 grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      reset();
-                      setPanel("create");
-                    }}
-                    className="flex flex-col items-start gap-2 rounded-2xl border border-white/12 bg-white/[0.07] p-4 text-left backdrop-blur transition active:scale-95"
-                  >
-                    <ListPlus className="h-6 w-6 text-primary" aria-hidden="true" />
-                    <span className="text-sm font-bold text-foreground">Crear playlist</span>
-                    <span className="text-[0.65rem] text-muted">Nueva en tu Spotify</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      reset();
-                      if (nowPlaying) void openAddPanel();
-                    }}
-                    disabled={!nowPlaying}
-                    className="flex flex-col items-start gap-2 rounded-2xl border border-white/12 bg-white/[0.07] p-4 text-left backdrop-blur transition active:scale-95 disabled:opacity-45"
-                  >
-                    <Music2 className="h-6 w-6 text-teal" aria-hidden="true" />
-                    <span className="text-sm font-bold text-foreground">Agregar lo que suena</span>
-                    <span className="text-[0.65rem] text-muted">
-                      {nowPlaying ? "A una playlist" : "Pon algo a sonar"}
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* ---- IR A ---- */}
-              <p className="mb-2 mt-4 px-1 font-readout text-xs font-bold uppercase tracking-[0.3em] text-gold">
-                Ir a
-              </p>
-              <div className="grid grid-cols-3 gap-2.5">
-                {NAV.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={close}
-                      className="flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center backdrop-blur"
-                      style={{
-                        background: active ? "rgba(255,140,0,0.16)" : "rgba(255,255,255,0.06)",
-                        border: active
-                          ? "1px solid rgba(255,178,77,0.45)"
-                          : "1px solid rgba(255,255,255,0.10)",
+                <>
+                  {/* Acciones (texto, sin iconos) */}
+                  <div className="border-t border-line/40">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        reset();
+                        setPanel("create");
                       }}
+                      className="flex w-full items-baseline justify-between border-b border-line/30 py-4 text-left"
                     >
-                      <Icon
-                        className="h-5 w-5"
-                        strokeWidth={1.8}
-                        style={{ color: active ? "#ffb24d" : "rgba(255,255,255,0.72)" }}
-                        aria-hidden="true"
-                      />
-                      <span
-                        className="text-[0.7rem] font-bold"
-                        style={{ color: active ? "#fff" : "rgba(255,255,255,0.78)" }}
-                      >
-                        {item.label}
+                      <span className="font-headline text-2xl text-foreground">
+                        Crear playlist
                       </span>
-                    </Link>
-                  );
-                })}
-              </div>
+                      <span className="font-readout text-[0.6rem] uppercase tracking-[0.25em] text-primary">
+                        Nueva
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        reset();
+                        if (nowPlaying) void openAddPanel();
+                      }}
+                      disabled={!nowPlaying}
+                      className="flex w-full items-baseline justify-between border-b border-line/30 py-4 text-left disabled:opacity-40"
+                    >
+                      <span className="font-headline text-2xl text-foreground">
+                        Agregar lo que suena
+                      </span>
+                      <span className="font-readout text-[0.6rem] uppercase tracking-[0.25em] text-primary">
+                        {nowPlaying ? "A playlist" : "—"}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Navegacion editorial (sin iconos) */}
+                  <nav className="mt-6">
+                    <p className="mb-2 font-readout text-[0.6rem] uppercase tracking-[0.35em] text-muted">
+                      Navegar
+                    </p>
+                    <ul className="divide-y divide-line/25">
+                      {NAV.map((item, i) => {
+                        const active = isActive(item.href);
+                        return (
+                          <motion.li
+                            key={item.href}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.03 + i * 0.03 }}
+                          >
+                            <Link
+                              href={item.href}
+                              onClick={close}
+                              className="flex items-center justify-between py-3"
+                            >
+                              <span
+                                className="font-headline text-xl transition"
+                                style={{ color: active ? "var(--primary)" : "var(--foreground)" }}
+                              >
+                                {item.label}
+                              </span>
+                              {active ? (
+                                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                              ) : (
+                                <span className="font-readout text-xs text-muted/50">
+                                  {String(i + 1).padStart(2, "0")}
+                                </span>
+                              )}
+                            </Link>
+                          </motion.li>
+                        );
+                      })}
+                    </ul>
+                  </nav>
+                </>
+              )}
             </motion.div>
           </>
         ) : null}

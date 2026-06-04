@@ -1,72 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  /* Tokens de marca Decaciones */
-  --dec-black: #050505;
-  --dec-gunmetal: #1a1918;
-  --dec-gold: #e9c349;
-  --dec-amber: #ff8c00;
-  --dec-warm: #ffb77d;
-  --dec-teal: #46d9c8;
+  /* Tokens de marca Decaciones — estilo Prince (morado sofisticado) */
+  --dec-black: #08060d;
+  --dec-violet: #a78bfa;
+  --dec-violet-deep: #6d3ad0;
+  --dec-mauve: #c4b5fd;
 
   /* ---- Tema OSCURO (default) ---- */
-  --background: #050505;
-  --foreground: #f2e7df;
-  --surface: #111111;
-  --surface-2: #1a1918;
-  --surface-3: #24211f;
-  --line: #4b392d;
-  --line-soft: rgba(255, 220, 195, 0.12);
-  --primary: #ffb77d;
-  --amber: #ff8c00;
-  --gold: #e9c349;
-  --teal: #46d9c8;
-  --rose: #e36b6b;
-  --muted: #ddc1ae;
-  --shadow: rgba(8, 5, 0, 0.68);
+  --background: #08060d;
+  --foreground: #ece8f2;
+  --surface: #110c1a;
+  --surface-2: #160f22;
+  --surface-3: #1e1530;
+  --line: #2c2240;
+  --line-soft: rgba(180, 160, 255, 0.12);
+  --primary: #a78bfa;
+  --amber: #c4b5fd;
+  --gold: #b9a3f2;
+  --teal: #9d8be0;
+  --rose: #e07a99;
+  --muted: #8b8299;
+  --shadow: rgba(4, 2, 10, 0.72);
 
-  /* Cromo (barras), paneles y malla de gradiente web3 */
-  --chrome: rgba(12, 11, 10, 0.82);
-  --panel: rgba(36, 34, 32, 0.94);
-  --panel-2: rgba(13, 13, 13, 0.94);
-  --btn-1: #34302d;
-  --btn-2: #151413;
-  --mesh-a: rgba(255, 140, 0, 0.16);
-  --mesh-b: rgba(70, 217, 200, 0.12);
-  --mesh-c: rgba(233, 195, 73, 0.12);
-  --mesh-base-1: #0b0b0b;
-  --mesh-base-2: #050505;
-  --mesh-base-3: #0a0806;
+  --chrome: rgba(11, 8, 18, 0.8);
+  --panel: rgba(30, 22, 44, 0.9);
+  --panel-2: rgba(15, 11, 22, 0.92);
+  --btn-1: #221a33;
+  --btn-2: #120c1c;
+  --mesh-a: rgba(140, 110, 255, 0.1);
+  --mesh-b: rgba(110, 90, 200, 0.08);
+  --mesh-c: rgba(170, 140, 255, 0.08);
+  --mesh-base-1: #0c0813;
+  --mesh-base-2: #08060d;
+  --mesh-base-3: #0a0712;
 }
 
 /* ---- Tema CLARO ---- */
 :root.light {
-  --background: #f5efe6;
-  --foreground: #221a12;
+  --background: #f1edf7;
+  --foreground: #1a1424;
   --surface: #ffffff;
-  --surface-2: #f1e8db;
-  --surface-3: #e7d9c6;
-  --line: #d8c2a8;
-  --line-soft: rgba(60, 40, 15, 0.14);
-  --primary: #c0631a;
-  --amber: #e07b00;
-  --gold: #a8801c;
-  --teal: #1c8576;
-  --rose: #c0452f;
-  --muted: #6c5945;
-  --shadow: rgba(70, 45, 12, 0.16);
+  --surface-2: #f0eaf8;
+  --surface-3: #e6dcf3;
+  --line: #d8cce9;
+  --line-soft: rgba(70, 45, 110, 0.14);
+  --primary: #6d3ad0;
+  --amber: #7c4dd6;
+  --gold: #6a44c0;
+  --teal: #5a40b0;
+  --rose: #c0455f;
+  --muted: #6a6080;
+  --shadow: rgba(50, 30, 80, 0.16);
 
-  --chrome: rgba(255, 252, 247, 0.82);
+  --chrome: rgba(252, 250, 255, 0.82);
   --panel: rgba(255, 255, 255, 0.94);
-  --panel-2: rgba(245, 239, 230, 0.94);
+  --panel-2: rgba(244, 240, 250, 0.94);
   --btn-1: #ffffff;
-  --btn-2: #ece2d4;
-  --mesh-a: rgba(255, 140, 0, 0.14);
-  --mesh-b: rgba(40, 190, 170, 0.12);
-  --mesh-c: rgba(233, 195, 73, 0.2);
-  --mesh-base-1: #fbf6ef;
-  --mesh-base-2: #f3ebe0;
-  --mesh-base-3: #efe5d6;
+  --btn-2: #ece4f6;
+  --mesh-a: rgba(140, 90, 240, 0.12);
+  --mesh-b: rgba(110, 70, 200, 0.1);
+  --mesh-c: rgba(170, 130, 250, 0.14);
+  --mesh-base-1: #f6f2fb;
+  --mesh-base-2: #efeaf7;
+  --mesh-base-3: #eae3f4;
 }
 
 @theme inline {
@@ -83,8 +80,8 @@
   --color-rose: var(--rose);
   --color-muted: var(--muted);
   --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", "Bricolage Grotesque Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Space Grotesk", "Space Grotesk Fallback", ui-monospace, monospace;
+  --font-display: "Bodoni Moda", "Bodoni Moda Fallback", Georgia, ui-serif, serif;
+  --font-mono: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
@@ -127,7 +124,7 @@ a {
   position: absolute;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: 0.55;
+  opacity: 0.22;
 }
 .cinematic-bg::before {
   width: 62vmax;
@@ -153,7 +150,7 @@ a {
   top: 38vh;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.38;
+  opacity: 0.16;
   background: radial-gradient(circle, var(--gold), transparent 60%);
   animation: drift3 32s ease-in-out infinite alternate;
 }
@@ -193,7 +190,7 @@ a {
 :root.light .cinematic-bg::before,
 :root.light .cinematic-bg::after,
 :root.light .cinematic-blob {
-  opacity: 0.28;
+  opacity: 0.14;
 }
 
 /* Rails horizontales tipo Apple TV: ocultar scrollbar */
@@ -214,8 +211,8 @@ a {
 }
 
 ::selection {
-  background: rgba(255, 183, 125, 0.32);
-  color: #fff6ea;
+  background: rgba(167, 139, 250, 0.34);
+  color: #f4f1fb;
 }
 
 ::-webkit-scrollbar {
@@ -246,27 +243,28 @@ a {
 }
 
 .font-display {
-  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  font-family: var(--font-bodoni), Georgia, ui-serif, serif;
+  letter-spacing: -0.01em;
 }
 
+/* Etiquetas pequenas: Inter en mayusculas con tracking (minimalista). */
 .font-readout {
-  font-family: var(--font-space-grotesk), ui-monospace, monospace;
-  letter-spacing: 0;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.08em;
 }
 
-/* Headlines: grotesca contemporanea premium (Bricolage Grotesque). */
+/* Titulares: Didone editorial fina (estilo Prince / revista). */
 .font-headline {
-  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.035em;
-  font-weight: 800;
+  font-family: var(--font-bodoni), Georgia, ui-serif, serif;
+  letter-spacing: -0.005em;
+  font-weight: 600;
 }
 
-/* Numeros / anios con impacto retro. */
+/* Numeros / anios: tambien en la Didone, elegantes. */
 .font-year {
-  font-family: var(--font-bebas), var(--font-space-grotesk), ui-sans-serif,
-    sans-serif;
-  letter-spacing: 0.04em;
+  font-family: var(--font-bodoni), Georgia, ui-serif, serif;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .metal-panel {
