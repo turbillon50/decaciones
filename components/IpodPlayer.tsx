@@ -4,24 +4,39 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { WaveformPlayer } from "@/components/WaveformPlayer";
+import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
 import { formatTime, usePlayer } from "@/lib/player-store";
 
 /**
- * Modo iPod Classic — dispositivo metalico con pantalla y click wheel.
+ * Modo iPod Classic. Cuando hay una cancion real sonando en Spotify, la
+ * pantalla y el click wheel controlan Spotify; si no, la rockola local.
  */
 export function IpodPlayer() {
-  const {
-    currentTrack,
-    isPlaying,
-    progress,
-    duration,
-    togglePlay,
-    nextTrack,
-    previousTrack,
-  } = usePlayer();
+  const sp = useSpotifyPlayback();
+  const local = usePlayer();
+  const spotifyActive = Boolean(sp.nowPlaying);
 
-  const activeDuration = duration || currentTrack.durationSeconds;
-  const percent = activeDuration ? (progress / activeDuration) * 100 : 0;
+  const cover = spotifyActive
+    ? sp.nowPlaying?.image ?? "/images/album-gold.svg"
+    : local.currentTrack.cover;
+  const title = spotifyActive ? sp.nowPlaying!.name : local.currentTrack.title;
+  const artist = spotifyActive
+    ? sp.nowPlaying!.artist
+    : local.currentTrack.artist;
+  const subline = spotifyActive
+    ? "Spotify · real"
+    : `${local.currentTrack.album} · ${local.currentTrack.year}`;
+  const playing = spotifyActive ? !sp.paused : local.isPlaying;
+
+  const posSec = spotifyActive ? sp.positionMs / 1000 : local.progress;
+  const durSec = spotifyActive
+    ? sp.durationMs / 1000
+    : local.duration || local.currentTrack.durationSeconds;
+  const percent = durSec ? Math.min(100, (posSec / durSec) * 100) : 0;
+
+  const onToggle = () => (spotifyActive ? sp.toggle() : local.togglePlay());
+  const onNext = () => (spotifyActive ? sp.next() : local.nextTrack());
+  const onPrev = () => (spotifyActive ? sp.previous() : local.previousTrack());
 
   return (
     <div className="mx-auto w-full max-w-[22rem]">
@@ -40,23 +55,23 @@ export function IpodPlayer() {
           <div className="pointer-events-none absolute inset-0 opacity-30 [background:linear-gradient(120deg,rgba(255,255,255,0.12),transparent_40%)]" />
           <div className="flex items-center justify-between font-readout text-[0.62rem] font-bold uppercase tracking-widest text-teal/80">
             <span>Decaciones</span>
-            <span>{isPlaying ? "▶ Now Playing" : "❚❚ Pausa"}</span>
+            <span>{playing ? "▶ Now Playing" : "❚❚ Pausa"}</span>
           </div>
 
           <div className="mt-3 flex items-center gap-3">
             <motion.div
               className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-black bg-black"
-              animate={{ rotate: isPlaying ? 360 : 0 }}
+              animate={{ rotate: playing ? 360 : 0 }}
               transition={
-                isPlaying
+                playing
                   ? { repeat: Infinity, duration: 8, ease: "linear" }
                   : { duration: 0.5 }
               }
               style={{ willChange: "transform" }}
             >
               <Image
-                src={currentTrack.cover}
-                alt={currentTrack.title}
+                src={cover}
+                alt={title}
                 fill
                 sizes="80px"
                 className="object-cover"
@@ -65,19 +80,17 @@ export function IpodPlayer() {
             </motion.div>
             <div className="min-w-0 flex-1">
               <p className="truncate font-headline text-base font-black text-[#dffaf2]">
-                {currentTrack.title}
+                {title}
               </p>
-              <p className="truncate text-xs text-teal/70">
-                {currentTrack.artist}
-              </p>
+              <p className="truncate text-xs text-teal/70">{artist}</p>
               <p className="font-readout mt-1 text-[0.6rem] text-teal/50">
-                {currentTrack.album} · {currentTrack.year}
+                {subline}
               </p>
             </div>
           </div>
 
           <div className="mt-3">
-            <WaveformPlayer playing={isPlaying} bars={28} />
+            <WaveformPlayer playing={playing} bars={28} />
           </div>
 
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -87,8 +100,8 @@ export function IpodPlayer() {
             />
           </div>
           <div className="mt-1 flex justify-between font-readout text-[0.6rem] text-teal/60">
-            <span>{formatTime(progress)}</span>
-            <span>-{formatTime(Math.max(activeDuration - progress, 0))}</span>
+            <span>{formatTime(posSec)}</span>
+            <span>-{formatTime(Math.max(durSec - posSec, 0))}</span>
           </div>
         </div>
 
@@ -106,14 +119,14 @@ export function IpodPlayer() {
           >
             <button
               type="button"
-              onClick={togglePlay}
+              onClick={onToggle}
               className="absolute left-1/2 top-6 -translate-x-1/2 font-readout text-base font-black text-muted transition hover:text-primary"
             >
               MENU
             </button>
             <button
               type="button"
-              onClick={previousTrack}
+              onClick={onPrev}
               className="absolute left-7 top-1/2 -translate-y-1/2 text-muted transition hover:text-primary"
               aria-label="Anterior"
             >
@@ -121,7 +134,7 @@ export function IpodPlayer() {
             </button>
             <button
               type="button"
-              onClick={nextTrack}
+              onClick={onNext}
               className="absolute right-7 top-1/2 -translate-y-1/2 text-muted transition hover:text-primary"
               aria-label="Siguiente"
             >
@@ -129,11 +142,11 @@ export function IpodPlayer() {
             </button>
             <button
               type="button"
-              onClick={togglePlay}
+              onClick={onToggle}
               className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted transition hover:text-primary"
-              aria-label={isPlaying ? "Pausar" : "Reproducir"}
+              aria-label={playing ? "Pausar" : "Reproducir"}
             >
-              {isPlaying ? (
+              {playing ? (
                 <Pause className="h-7 w-7" fill="currentColor" aria-hidden="true" />
               ) : (
                 <Play className="h-7 w-7" fill="currentColor" aria-hidden="true" />
@@ -141,7 +154,7 @@ export function IpodPlayer() {
             </button>
             <button
               type="button"
-              onClick={togglePlay}
+              onClick={onToggle}
               className="absolute left-1/2 top-1/2 grid h-[44%] w-[44%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-primary"
               style={{
                 background:
@@ -150,7 +163,7 @@ export function IpodPlayer() {
                   "0 0 30px rgba(255,140,0,0.22), inset 0 2px 3px rgba(255,255,255,0.15)",
                 border: "1px solid var(--line-soft)",
               }}
-              aria-label={isPlaying ? "Pausar" : "Reproducir"}
+              aria-label={playing ? "Pausar" : "Reproducir"}
             >
               <span className="h-5 w-5 rounded-full bg-primary shadow-[0_0_24px_rgba(255,183,125,0.85)]" />
             </button>
