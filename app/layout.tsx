@@ -1,11 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import {
-  Bebas_Neue,
-  Bricolage_Grotesque,
-  Inter,
-  Space_Grotesk,
-} from "next/font/google";
+import { Bodoni_Moda, Inter } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
@@ -15,25 +10,12 @@ const inter = Inter({
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+// Titulares: Didone editorial fina (estilo revista de moda / lujo).
+const bodoni = Bodoni_Moda({
+  variable: "--font-bodoni",
   subsets: ["latin"],
-  display: "swap",
-});
-
-// Headlines: grotesca contemporanea premium (reemplaza a Playfair).
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
-  display: "swap",
-});
-
-// Numeros y anios con impacto retro.
-const bebas = Bebas_Neue({
-  variable: "--font-bebas",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -83,7 +65,7 @@ export default function RootLayout({
     >
       <html
         lang="es"
-        className={`${inter.variable} ${spaceGrotesk.variable} ${bricolage.variable} ${bebas.variable} h-full dark`}
+        className={`${inter.variable} ${bodoni.variable} h-full dark`}
       >
         <body className="min-h-full antialiased">
           <script
