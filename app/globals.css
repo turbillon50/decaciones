@@ -83,7 +83,7 @@
   --color-rose: var(--rose);
   --color-muted: var(--muted);
   --font-sans: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Chivo", "Chivo Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Bricolage Grotesque Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Space Grotesk", "Space Grotesk Fallback", ui-monospace, monospace;
 }
 
@@ -246,8 +246,8 @@ a {
 }
 
 .font-display {
-  font-family: var(--font-chivo), ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: 0;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 .font-readout {
@@ -255,10 +255,11 @@ a {
   letter-spacing: 0;
 }
 
-/* Headlines elegantes (serif) para decadas y heroes premium. */
+/* Headlines: grotesca contemporanea premium (Bricolage Grotesque). */
 .font-headline {
-  font-family: var(--font-playfair), Georgia, ui-serif, serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.035em;
+  font-weight: 800;
 }
 
 /* Numeros / anios con impacto retro. */
