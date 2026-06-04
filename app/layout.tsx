@@ -2,9 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import {
   Bebas_Neue,
-  Chivo,
+  Bricolage_Grotesque,
   Inter,
-  Playfair_Display,
   Space_Grotesk,
 } from "next/font/google";
 import { AppShell } from "@/components/AppShell";
@@ -16,23 +15,17 @@ const inter = Inter({
   display: "swap",
 });
 
-const chivo = Chivo({
-  variable: "--font-chivo",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Headlines elegantes para las decadas (Cover Flow / heroes).
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+// Headlines: grotesca contemporanea premium (reemplaza a Playfair).
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["500", "700", "900"],
+  weight: ["400", "600", "700", "800"],
   display: "swap",
 });
 
@@ -90,7 +83,7 @@ export default function RootLayout({
     >
       <html
         lang="es"
-        className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${bricolage.variable} ${bebas.variable} h-full dark`}
       >
         <body className="min-h-full antialiased">
           <script
