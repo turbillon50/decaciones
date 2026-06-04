@@ -1,62 +1,49 @@
-const CACHE_NAME = "decaciones-v2";
-const APP_SHELL = [
-  "/",
-  "/decades",
-  "/genres",
-  "/favorites",
-  "/player",
-  "/ai",
-  "/spotify",
-  "/settings",
-  "/manifest.json",
-  "/icons/decaciones-icon.svg",
-  "/icons/maskable-icon.svg",
-  "/images/decaciones-hero.svg",
-  "/images/album-gold.svg",
-  "/images/album-amber.svg",
-  "/images/album-teal.svg",
-  "/images/album-rose.svg",
-  "/images/vu-meters.svg",
-  "/audio/60s/demo.wav",
-  "/audio/70s/demo.wav",
-  "/audio/80s/demo.wav",
-  "/audio/90s/demo.wav",
-  "/audio/2000s/demo.wav",
-  "/audio/salsa/demo.wav",
-  "/audio/merengue/demo.wav",
-  "/audio/romanticas/demo.wav",
-  "/audio/electronica/demo.wav"
-];
+// Decaciones service worker — NETWORK FIRST.
+// El SW anterior era cache-first y servia HTML viejo para siempre. Este
+// siempre intenta la red primero (contenido fresco) y solo usa cache offline.
+const CACHE_NAME = "decaciones-v4";
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))))
-      )
+    (async () => {
+      // Borra TODO cache viejo (incluida la app shell stale).
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))),
+      );
+      await self.clients.claim();
+    })(),
   );
-  self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data === "skip-waiting") self.skipWaiting();
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") {
-    return;
-  }
+  const req = event.request;
+  if (req.method !== "GET") return;
+
+  const url = new URL(req.url);
+  // No tocar otros origenes (Spotify CDN/SDK) ni las rutas de API.
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/api/")) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) {
-        return cached;
+    (async () => {
+      try {
+        const fresh = await fetch(req);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch {
+        const cached = await caches.match(req);
+        return cached || caches.match("/");
       }
-      return fetch(event.request).catch(() => caches.match("/"));
-    })
+    })(),
   );
 });
