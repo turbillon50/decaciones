@@ -1,6 +1,6 @@
 "use client";
 
-import { BottomNav } from "@/components/BottomNav";
+import { CommandMenu } from "@/components/CommandMenu";
 import { PlaybackBar } from "@/components/PlaybackBar";
 import { PWAInstaller } from "@/components/PWAInstaller";
 import { TopBar } from "@/components/TopBar";
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <TopBar />
             <PageTransition>{children}</PageTransition>
             <PlaybackBar />
-            <BottomNav />
+            <CommandMenu />
             <PWAInstaller />
           </div>
         </SpotifyPlaybackProvider>

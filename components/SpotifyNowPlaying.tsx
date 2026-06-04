@@ -16,7 +16,7 @@ export function SpotifyNowPlaying() {
   const percent = durationMs ? Math.min(100, (positionMs / durationMs) * 100) : 0;
 
   return (
-    <aside className="chrome-bar fixed inset-x-3 bottom-[5.4rem] z-40 mx-auto max-w-md rounded-2xl border border-teal/40 p-3 shadow-[0_18px_42px_var(--shadow)] lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0 lg:w-[24rem]">
+    <aside className="chrome-bar fixed inset-x-3 bottom-[7rem] z-40 mx-auto max-w-md rounded-2xl border border-teal/40 p-3 shadow-[0_18px_42px_var(--shadow)] lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0 lg:w-[24rem]">
       <div className="flex items-center gap-3">
         <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line/60 bg-black">
           {nowPlaying.image ? (
