@@ -5,6 +5,7 @@ const apiBaseUrl = "https://api.spotify.com/v1";
 const scopes = [
   "playlist-modify-private",
   "playlist-modify-public",
+  "playlist-read-private",
   "user-read-private",
   "user-read-email",
   "streaming",
@@ -83,7 +84,7 @@ async function parseSpotifyResponse<T>(response: Response): Promise<T> {
       payload?.error ??
       `Spotify request failed with ${response.status}`;
     console.error(
-      `[spotify] ${response.status} ${response.url} -> ${text.slice(0, 300)}`,
+      `[spotify] status=${response.status} body=${text.slice(0, 200)} url=${response.url}`,
     );
     throw new Error(message);
   }
@@ -264,29 +265,37 @@ export async function searchSpotify(
 ): Promise<SpotifySearchResults> {
   const yearFilter = decadeToYearFilter(decade);
   const q = yearFilter ? `${query} ${yearFilter}` : query;
-  const safeLimit = Math.min(Math.max(Math.trunc(limit) || 10, 1), 50);
+  const safeLimit = Math.min(Math.max(Math.trunc(limit) || 20, 1), 50);
+  const typeStr = types.join(",");
 
-  const run = async (typeList: Array<"track" | "album" | "artist">) => {
-    const params = new URLSearchParams({
-      q,
-      type: typeList.join(","),
-      limit: String(safeLimit),
-      market: "from_token",
-    });
+  const run = async (qs: Record<string, string>) => {
+    const params = new URLSearchParams({ q, ...qs });
     const response = await fetch(`${apiBaseUrl}/search?${params.toString()}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return parseSpotifyResponse<SpotifySearchRawResponse>(response);
   };
 
-  // La busqueda multi-tipo a veces falla; si ocurre, degradamos a solo tracks
-  // para no romper la experiencia.
-  let data: SpotifySearchRawResponse;
-  try {
-    data = await run(types);
-  } catch {
-    data = await run(["track"]);
+  // Algunos tokens/apps rechazan ciertas combinaciones (p.ej. "Invalid limit").
+  // Probamos variantes de menor a mayor restriccion hasta que una funcione.
+  const attempts: Array<Record<string, string>> = [
+    { type: typeStr, limit: String(safeLimit) },
+    { type: typeStr },
+    { type: "track", limit: String(safeLimit) },
+    { type: "track" },
+  ];
+
+  let data: SpotifySearchRawResponse | null = null;
+  let lastError: unknown = null;
+  for (const attempt of attempts) {
+    try {
+      data = await run(attempt);
+      break;
+    } catch (e) {
+      lastError = e;
+    }
   }
+  if (!data) throw lastError instanceof Error ? lastError : new Error("spotify_search_failed");
 
   return {
     tracks: (data.tracks?.items ?? []).map((t) => ({
