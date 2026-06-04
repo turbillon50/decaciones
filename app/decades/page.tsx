@@ -2,17 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Disc3 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { CoverFlow, type CoverFlowItem } from "@/components/CoverFlow";
-import { PlaylistCard } from "@/components/PlaylistCard";
 import { RecentPlaylists } from "@/components/RecentPlaylists";
-import {
-  HoverCard,
-  SlideIn,
-  StaggerContainer,
-  StaggerItem,
-} from "@/components/motion";
-import { decades, playlists } from "@/data/music";
+import { SlideIn } from "@/components/motion";
+import { decades } from "@/data/music";
 import { decadeMeta } from "@/data/decades-meta";
 
 const coverItems: CoverFlowItem[] = decadeMeta.map((meta) => ({
@@ -63,24 +57,6 @@ export default function DecadesPage() {
           <ArrowRight className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
-
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Disc3 className="h-5 w-5 text-gold" aria-hidden="true" />
-          <h2 className="font-headline text-2xl font-black text-foreground">
-            Mezclas por memoria
-          </h2>
-        </div>
-        <StaggerContainer className="grid gap-4 lg:grid-cols-2">
-          {playlists.map((playlist) => (
-            <StaggerItem key={playlist.id}>
-              <HoverCard>
-                <PlaylistCard playlist={playlist} />
-              </HoverCard>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
-      </section>
 
       <RecentPlaylists />
     </main>

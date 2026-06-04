@@ -1,13 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ListMusic, Loader2, Music2, Volume2 } from "lucide-react";
-import { PlayerControls } from "@/components/PlayerControls";
-import { WaveformPlayer } from "@/components/WaveformPlayer";
+import {
+  Heart,
+  ListMusic,
+  ListPlus,
+  Loader2,
+  Music2,
+  Repeat,
+  Shuffle,
+  Volume2,
+} from "lucide-react";
+import { IpodPlayer } from "@/components/IpodPlayer";
 import { SlideIn } from "@/components/motion";
+import { cn } from "@/lib/utils";
 import type { SpotifySearchResults } from "@/lib/spotify";
 import { spotifyTrackToTrack } from "@/lib/spotify-map";
 import { usePlayer } from "@/lib/player-store";
@@ -24,12 +32,47 @@ export function PlayerExperience() {
     : undefined;
   const spotifyMode = Boolean(genre && decade);
 
-  const { currentTrack, isPlaying, queue, playTrack } = usePlayer();
+  const {
+    queue,
+    playTrack,
+    shuffleEnabled,
+    repeatEnabled,
+    toggleShuffle,
+    toggleRepeat,
+    toggleFavorite,
+    isFavorite,
+  } = usePlayer();
 
   const [results, setResults] = useState<Track[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notConnected, setNotConnected] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState<{ url: string } | null>(null);
+
+  async function createPlaylistFromResults() {
+    if (results.length === 0 || !genre || !decade) return;
+    setCreating(true);
+    setCreated(null);
+    try {
+      const res = await fetch("/api/spotify/playlist/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `Decaciones · ${genre} ${decade}`,
+          decade,
+          trackUris: results.map((t) => t.spotifyUri).filter(Boolean),
+        }),
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error ?? "No se pudo crear");
+      setCreated({ url: payload.playlist.url });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo crear");
+    } finally {
+      setCreating(false);
+    }
+  }
 
   useEffect(() => {
     if (!spotifyMode || !genre || !decade) return;
@@ -82,52 +125,47 @@ export function PlayerExperience() {
           </div>
         ) : null}
 
-        <div className="relative mx-auto aspect-square w-full max-w-md rounded-3xl p-3 metal-panel">
-          <div className="absolute inset-10 rounded-full bg-primary/20 blur-3xl" />
-          <motion.div
-            className="relative mx-auto h-full w-full overflow-hidden rounded-full border-4 border-black bg-black shadow-2xl"
-            animate={{ rotate: isPlaying ? 360 : 0 }}
-            transition={
-              isPlaying
-                ? { repeat: Infinity, duration: 8, ease: "linear" }
-                : { duration: 0.5, ease: "easeOut" }
-            }
-            style={{ willChange: "transform" }}
+        <IpodPlayer />
+
+        {/* Controles secundarios */}
+        <div className="mx-auto flex max-w-[22rem] items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={toggleShuffle}
+            className={cn(
+              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+              shuffleEnabled ? "bg-primary/10 text-primary" : "text-muted",
+            )}
+            aria-label="Mezclar"
           >
-            <Image
-              src={currentTrack.cover}
-              alt={`${currentTrack.title} album art`}
-              fill
-              priority
-              sizes="(max-width: 768px) 90vw, 420px"
-              className="object-cover"
-            />
-            <div
-              className="absolute inset-0 rounded-full [background:repeating-radial-gradient(circle,rgba(0,0,0,0.16)_0_2px,transparent_2px_9px)]"
+            <Shuffle className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => toggleFavorite()}
+            className={cn(
+              "metal-button grid h-14 w-14 place-items-center rounded-full transition",
+              isFavorite() ? "text-primary" : "text-muted",
+            )}
+            aria-label="Favorita"
+          >
+            <Heart
+              className="h-6 w-6"
+              fill={isFavorite() ? "currentColor" : "none"}
               aria-hidden="true"
             />
-            <div
-              className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-black bg-primary/90 shadow-inner"
-              aria-hidden="true"
-            />
-          </motion.div>
-        </div>
-
-        <div className="mx-auto max-w-md space-y-2 text-center">
-          <h1 className="font-headline text-3xl font-black text-foreground">
-            {currentTrack.title}
-          </h1>
-          <p className="text-xl text-primary">
-            {currentTrack.artist} - {currentTrack.album} ({currentTrack.year})
-          </p>
-        </div>
-
-        <div className="mx-auto max-w-md">
-          <WaveformPlayer playing={isPlaying} />
-        </div>
-
-        <div className="mx-auto w-full max-w-md">
-          <PlayerControls wheel />
+          </button>
+          <button
+            type="button"
+            onClick={toggleRepeat}
+            className={cn(
+              "grid h-12 w-12 place-items-center rounded-full transition hover:text-primary",
+              repeatEnabled ? "bg-primary/10 text-primary" : "text-muted",
+            )}
+            aria-label="Repetir"
+          >
+            <Repeat className="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
       </section>
 
@@ -192,6 +230,34 @@ export function PlayerExperience() {
                 ))}
               </ol>
             )}
+
+            {results.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                <button
+                  type="button"
+                  onClick={createPlaylistFromResults}
+                  disabled={creating}
+                  className="metal-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 text-sm font-black text-primary disabled:opacity-50"
+                >
+                  {creating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <ListPlus className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Crear playlist {genre} {decade}
+                </button>
+                {created ? (
+                  <a
+                    href={created.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block text-center text-sm font-bold text-teal"
+                  >
+                    Abrir en Spotify ↗
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
           </SlideIn>
         ) : (
           <>

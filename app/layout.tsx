@@ -93,6 +93,11 @@ export default function RootLayout({
         className={`${inter.variable} ${chivo.variable} ${spaceGrotesk.variable} ${playfair.variable} ${bebas.variable} h-full dark`}
       >
         <body className="min-h-full antialiased">
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('decaciones:theme')||'dark';var r=document.documentElement;r.classList.toggle('light',t==='light');r.classList.toggle('dark',t!=='light');}catch(e){}})();`,
+            }}
+          />
           <AppShell>{children}</AppShell>
         </body>
       </html>

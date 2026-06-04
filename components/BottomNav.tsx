@@ -18,7 +18,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-line/50 bg-[#191817]/92 px-2 pt-2 shadow-[0_-18px_38px_rgba(0,0,0,0.45)] backdrop-blur-2xl lg:hidden">
+    <nav className="chrome-bar fixed inset-x-0 bottom-0 z-50 border-t border-line/50 px-2 pt-2 shadow-[0_-18px_38px_var(--shadow)] lg:hidden">
       <div className="safe-bottom mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
           const Icon = item.icon;
