@@ -8,12 +8,14 @@ import {
   ExternalLink,
   Loader2,
   Music,
+  Play,
   Plus,
   Search as SearchIcon,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SlideIn, StaggerContainer, StaggerItem } from "@/components/motion";
+import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
 import type { SpotifySearchResults, SpotifySearchTrack } from "@/lib/spotify";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,7 @@ const RECENT_KEY = "decaciones:searches";
 const empty: SpotifySearchResults = { tracks: [], albums: [], artists: [] };
 
 export default function SearchPage() {
+  const playback = useSpotifyPlayback();
   const [query, setQuery] = useState("");
   const [decade, setDecade] = useState("");
   const [results, setResults] = useState<SpotifySearchResults>(empty);
@@ -241,6 +244,14 @@ export default function SearchPage() {
         </div>
       ) : null}
 
+      {playback.premiumRequired ? (
+        <div className="rounded-2xl border border-amber/30 bg-amber/10 p-4 text-sm leading-6 text-muted">
+          La reproduccion dentro de la app requiere{" "}
+          <span className="font-bold text-amber">Spotify Premium</span>. Sin
+          Premium abrimos cada cancion en Spotify.
+        </div>
+      ) : null}
+
       {error ? (
         <p className="rounded-2xl border border-rose/30 bg-rose/10 p-4 text-sm text-rose">
           {error}
@@ -348,6 +359,15 @@ export default function SearchPage() {
                         {track.year ? ` · ${track.year}` : ""}
                       </p>
                     </div>
+                    <motion.button
+                      type="button"
+                      onClick={() => playback.play([track.uri], track.spotifyUrl)}
+                      whileTap={{ scale: 0.85 }}
+                      className="metal-button grid h-10 w-10 shrink-0 place-items-center rounded-full text-primary"
+                      aria-label={`Reproducir ${track.name}`}
+                    >
+                      <Play className="h-4 w-4" fill="currentColor" aria-hidden="true" />
+                    </motion.button>
                     <motion.button
                       type="button"
                       onClick={() => toggleSelect(track)}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { IpodPlayer } from "@/components/IpodPlayer";
 import { SlideIn } from "@/components/motion";
+import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
 import { cn } from "@/lib/utils";
 import type { SpotifySearchResults } from "@/lib/spotify";
 import { spotifyTrackToTrack } from "@/lib/spotify-map";
@@ -31,6 +32,7 @@ export function PlayerExperience() {
     ? (decadeParam as DecadeId)
     : undefined;
   const spotifyMode = Boolean(genre && decade);
+  const playback = useSpotifyPlayback();
 
   const {
     queue,
@@ -49,6 +51,15 @@ export function PlayerExperience() {
   const [notConnected, setNotConnected] = useState(false);
   const [creating, setCreating] = useState(false);
   const [created, setCreated] = useState<{ url: string } | null>(null);
+
+  function playFrom(track: Track) {
+    const idx = results.findIndex((r) => r.id === track.id);
+    const uris = results
+      .slice(idx < 0 ? 0 : idx)
+      .map((r) => r.spotifyUri)
+      .filter((u): u is string => Boolean(u));
+    void playback.play(uris, `https://open.spotify.com/track/${track.id}`);
+  }
 
   async function createPlaylistFromResults() {
     if (results.length === 0 || !genre || !decade) return;
@@ -204,7 +215,7 @@ export function PlayerExperience() {
                   <li key={track.id}>
                     <button
                       type="button"
-                      onClick={() => playTrack(track, results)}
+                      onClick={() => playFrom(track)}
                       className="flex w-full items-center gap-3 rounded-xl bg-surface-2/70 p-2 text-left transition hover:bg-primary/10"
                     >
                       <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-line/50 bg-black">
