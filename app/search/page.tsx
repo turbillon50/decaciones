@@ -37,6 +37,9 @@ export default function SearchPage() {
   const [error, setError] = useState("");
   const [notConnected, setNotConnected] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
+  const [history, setHistory] = useState<
+    Array<{ trackName: string | null; artist: string | null }>
+  >([]);
   const [selected, setSelected] = useState<Record<string, SpotifySearchTrack>>(
     {},
   );
@@ -54,6 +57,25 @@ export default function SearchPage() {
     } catch {
       /* ignore */
     }
+  }, []);
+
+  // Historial real de reproduccion (user_history) si hay sesion de Clerk.
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/history?limit=10");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (active) setHistory(data.history ?? []);
+      } catch {
+        /* sin sesion / sin DB */
+      }
+    };
+    void load();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const pushRecent = useCallback((term: string) => {
@@ -257,6 +279,37 @@ export default function SearchPage() {
                 className="rounded-full border border-line/50 bg-surface-2/60 px-4 py-2 text-sm text-muted transition hover:text-primary"
               >
                 {term}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Reproducido recientemente (historial real) */}
+      {!query && history.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="font-readout text-xs font-bold uppercase text-muted">
+            Reproducido recientemente
+          </h2>
+          <div className="space-y-2">
+            {history.slice(0, 6).map((h, i) => (
+              <button
+                key={`${h.trackName}-${i}`}
+                type="button"
+                onClick={() => setQuery(h.trackName ?? "")}
+                className="flex w-full items-center gap-3 rounded-xl bg-surface-2/50 p-2.5 text-left transition hover:bg-primary/10"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-black/40 text-gold">
+                  <Music className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-foreground">
+                    {h.trackName ?? "—"}
+                  </span>
+                  <span className="block truncate text-xs text-muted">
+                    {h.artist ?? ""}
+                  </span>
+                </span>
               </button>
             ))}
           </div>

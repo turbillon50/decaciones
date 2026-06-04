@@ -5,9 +5,34 @@ import {
   addTracksToPlaylist,
   createPlaylist,
   getCurrentSpotifyUser,
+  getUserPlaylists,
   searchTracks,
 } from "@/lib/spotify";
 import type { Track } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("spotify_access_token")?.value;
+
+  if (!accessToken) {
+    return NextResponse.json({ playlists: [] }, { status: 401 });
+  }
+
+  try {
+    const userPlaylists = await getUserPlaylists(accessToken, 12);
+    return NextResponse.json({ playlists: userPlaylists });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "spotify_playlists_failed",
+      },
+      { status: 500 },
+    );
+  }
+}
 
 type SpotifyPlaylistSource = {
   id: string;

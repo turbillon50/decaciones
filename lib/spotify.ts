@@ -375,3 +375,44 @@ export async function addTracksToPlaylist(
 
   return parseSpotifyResponse<{ snapshot_id: string }>(response);
 }
+
+export type SpotifyUserPlaylist = {
+  id: string;
+  name: string;
+  image: string | null;
+  tracks: number;
+  url: string;
+  owner: string;
+};
+
+type SpotifyUserPlaylistsRaw = {
+  items: Array<{
+    id: string;
+    name: string;
+    images: Array<{ url: string }>;
+    tracks: { total: number };
+    external_urls: { spotify: string };
+    owner: { display_name?: string };
+  }>;
+};
+
+export async function getUserPlaylists(
+  accessToken: string,
+  limit = 12,
+): Promise<SpotifyUserPlaylist[]> {
+  const params = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 50)),
+  });
+  const response = await fetch(`${apiBaseUrl}/me/playlists?${params.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const data = await parseSpotifyResponse<SpotifyUserPlaylistsRaw>(response);
+  return (data.items ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    image: p.images?.[0]?.url ?? null,
+    tracks: p.tracks?.total ?? 0,
+    url: p.external_urls.spotify,
+    owner: p.owner?.display_name ?? "",
+  }));
+}

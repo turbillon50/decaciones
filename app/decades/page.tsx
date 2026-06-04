@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Disc3 } from "lucide-react";
 import { CoverFlow, type CoverFlowItem } from "@/components/CoverFlow";
 import { PlaylistCard } from "@/components/PlaylistCard";
+import { RecentPlaylists } from "@/components/RecentPlaylists";
 import {
   HoverCard,
   SlideIn,
@@ -80,6 +81,8 @@ export default function DecadesPage() {
           ))}
         </StaggerContainer>
       </section>
+
+      <RecentPlaylists />
     </main>
   );
 }
