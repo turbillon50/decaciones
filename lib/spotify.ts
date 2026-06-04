@@ -78,6 +78,9 @@ async function parseSpotifyResponse<T>(response: Response): Promise<T> {
       payload?.error?.message ??
       payload?.error ??
       `Spotify request failed with ${response.status}`;
+    console.error(
+      `[spotify] ${response.status} ${response.url} -> ${text.slice(0, 300)}`,
+    );
     throw new Error(message);
   }
 
@@ -257,17 +260,29 @@ export async function searchSpotify(
 ): Promise<SpotifySearchResults> {
   const yearFilter = decadeToYearFilter(decade);
   const q = yearFilter ? `${query} ${yearFilter}` : query;
+  const safeLimit = Math.min(Math.max(Math.trunc(limit) || 10, 1), 50);
 
-  const params = new URLSearchParams({
-    q,
-    type: types.join(","),
-    limit: String(Math.min(Math.max(limit, 1), 50)),
-  });
+  const run = async (typeList: Array<"track" | "album" | "artist">) => {
+    const params = new URLSearchParams({
+      q,
+      type: typeList.join(","),
+      limit: String(safeLimit),
+      market: "from_token",
+    });
+    const response = await fetch(`${apiBaseUrl}/search?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return parseSpotifyResponse<SpotifySearchRawResponse>(response);
+  };
 
-  const response = await fetch(`${apiBaseUrl}/search?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  const data = await parseSpotifyResponse<SpotifySearchRawResponse>(response);
+  // La busqueda multi-tipo a veces falla; si ocurre, degradamos a solo tracks
+  // para no romper la experiencia.
+  let data: SpotifySearchRawResponse;
+  try {
+    data = await run(types);
+  } catch {
+    data = await run(["track"]);
+  }
 
   return {
     tracks: (data.tracks?.items ?? []).map((t) => ({
