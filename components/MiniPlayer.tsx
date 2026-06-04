@@ -24,7 +24,7 @@ export function MiniPlayer() {
   );
 
   return (
-    <aside className="fixed inset-x-3 bottom-[5.4rem] z-40 mx-auto max-w-md rounded-2xl border border-line/60 bg-[#181716]/94 p-3 shadow-[0_18px_42px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0 lg:w-[24rem]">
+    <aside className="chrome-bar fixed inset-x-3 bottom-[5.4rem] z-40 mx-auto max-w-md rounded-2xl border border-line/60 p-3 shadow-[0_18px_42px_var(--shadow)] lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0 lg:w-[24rem]">
       <div className="flex items-center gap-3">
         <Link
           href="/player"

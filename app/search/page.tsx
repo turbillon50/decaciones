@@ -183,7 +183,7 @@ export default function SearchPage() {
 
       {/* Barra de busqueda */}
       <div className="sticky top-20 z-30 -mx-1 rounded-2xl p-1">
-        <div className="flex items-center gap-3 rounded-2xl border border-line/60 bg-[#181716]/95 px-4 py-3 backdrop-blur-2xl">
+        <div className="chrome-bar flex items-center gap-3 rounded-2xl border border-line/60 px-4 py-3">
           <SearchIcon className="h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
           <input
             value={query}
@@ -464,7 +464,7 @@ export default function SearchPage() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="fixed inset-x-3 bottom-24 z-40 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-[#181716]/95 p-3 backdrop-blur-2xl lg:bottom-6"
+            className="chrome-bar fixed inset-x-3 bottom-24 z-40 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl border border-primary/40 p-3 lg:bottom-6"
           >
             <span className="font-year text-2xl text-primary">
               {selectedList.length}

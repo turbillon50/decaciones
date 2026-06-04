@@ -4,11 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { LogIn, Music, Sparkles } from "lucide-react";
-import { DecadeCard } from "@/components/DecadeCard";
-import { GenreCard } from "@/components/GenreCard";
 import { GoldenParticles } from "@/components/GoldenParticles";
-import { PlaylistCard } from "@/components/PlaylistCard";
-import { decades, genres, playlists } from "@/data/music";
 
 export const dynamic = "force-dynamic";
 
@@ -73,41 +69,40 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="font-display text-2xl font-black text-foreground">
-            Decadas esenciales
-          </h2>
-          <span className="font-readout text-sm text-gold">VINYL MODE</span>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          {decades.map((decade) => (
-            <DecadeCard key={decade.id} decade={decade} compact />
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4">
-          <h2 className="font-display text-2xl font-black text-foreground">
-            Generos de la rockola
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {genres.slice(0, 4).map((genre) => (
-              <GenreCard key={genre.id} genre={genre} />
-            ))}
-          </div>
-        </div>
-        <div className="space-y-4">
-          <h2 className="font-display text-2xl font-black text-foreground">
-            Sesiones listas
-          </h2>
-          <div className="space-y-4">
-            {playlists.slice(0, 3).map((playlist) => (
-              <PlaylistCard key={playlist.id} playlist={playlist} />
-            ))}
-          </div>
-        </div>
+      <section className="grid gap-4 sm:grid-cols-3">
+        {[
+          {
+            k: "Decadas",
+            t: "Cover Flow 3D",
+            d: "Viaja por los 60s a los 2000s en un carrusel premium.",
+            grad: "from-amber/20",
+          },
+          {
+            k: "Generos",
+            t: "Por epoca y estilo",
+            d: "Synth-pop de los 80s, salsa de los 70s, grunge de los 90s.",
+            grad: "from-teal/20",
+          },
+          {
+            k: "Spotify",
+            t: "Busca y arma playlists",
+            d: "Encuentra cualquier cancion y guardala en tu cuenta.",
+            grad: "from-gold/20",
+          },
+        ].map((f) => (
+          <article
+            key={f.k}
+            className={`rounded-2xl bg-gradient-to-br ${f.grad} to-transparent p-5 metal-panel`}
+          >
+            <p className="font-readout text-xs font-bold uppercase text-gold">
+              {f.k}
+            </p>
+            <h3 className="mt-2 font-headline text-xl font-black text-foreground">
+              {f.t}
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-muted">{f.d}</p>
+          </article>
+        ))}
       </section>
     </main>
   );

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { ArrowLeft, LogIn, Settings } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const titles: Record<string, string> = {
   "/": "DECACIONES",
@@ -23,7 +24,7 @@ export function TopBar() {
   const isHome = pathname === "/";
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full border-b border-line/40 bg-black/75 backdrop-blur-2xl">
+    <header className="chrome-bar fixed left-0 top-0 z-50 w-full border-b border-line/40">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <button
           type="button"
@@ -40,6 +41,7 @@ export function TopBar() {
           {titles[pathname] ?? "DECACIONES"}
         </Link>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {isSignedIn ? (
             <UserButton appearance={{ elements: { avatarBox: "h-9 w-9" } }} />
           ) : (
