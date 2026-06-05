@@ -1,44 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import { useAuth, UserButton } from "@clerk/nextjs";
-import { ArrowLeft, LogIn, Settings } from "lucide-react";
+import { LogIn, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const titles: Record<string, string> = {
-  "/": "DECACIONES",
-  "/decades": "DECACIONES",
-  "/genres": "GENEROS",
-  "/favorites": "FAVORITAS",
-  "/player": "REPRODUCTOR",
-  "/ai": "DECACIONES IA",
-  "/spotify": "SPOTIFY",
-  "/settings": "AJUSTES",
-};
-
 export function TopBar() {
-  const pathname = usePathname();
-  const router = useRouter();
   const { isSignedIn } = useAuth();
-  const isHome = pathname === "/";
 
   return (
     <header className="chrome-bar fixed left-0 top-0 z-50 w-full border-b border-line/40">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <button
-          type="button"
-          onClick={() => (isHome ? router.push("/decades") : router.back())}
-          className="metal-button grid h-11 w-11 place-items-center rounded-full text-primary transition hover:text-gold"
-          aria-label={isHome ? "Ir a decadas" : "Volver"}
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
         <Link
           href="/"
-          className="font-display truncate px-3 text-center text-3xl font-black leading-none gold-text sm:text-4xl"
+          className="font-display truncate text-2xl font-black italic leading-none gold-text sm:text-3xl"
         >
-          {titles[pathname] ?? "DECACIONES"}
+          Decaciones
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />

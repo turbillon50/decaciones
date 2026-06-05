@@ -15,12 +15,12 @@ export async function GET(request: NextRequest) {
   const storedState = request.cookies.get("spotify_oauth_state")?.value;
 
   if (error) {
-    return NextResponse.redirect(new URL(`/spotify?error=${error}`, url.origin));
+    return NextResponse.redirect(new URL(`/?error=${error}`, url.origin));
   }
 
   if (!code || !state || !storedState || state !== storedState) {
     return NextResponse.redirect(
-      new URL("/spotify?error=invalid_spotify_state", url.origin),
+      new URL("/?error=invalid_spotify_state", url.origin),
     );
   }
 
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     const response = NextResponse.redirect(
-      new URL("/spotify?connected=true", url.origin),
+      new URL("/?connected=true", url.origin),
     );
     response.cookies.delete("spotify_oauth_state");
     response.cookies.set("spotify_access_token", token.access_token, {
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     const message =
       tokenError instanceof Error ? tokenError.message : "token_exchange_failed";
     return NextResponse.redirect(
-      new URL(`/spotify?error=${encodeURIComponent(message)}`, url.origin),
+      new URL(`/?error=${encodeURIComponent(message)}`, url.origin),
     );
   }
 }

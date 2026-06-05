@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { Pause, Play, Search, SkipBack, SkipForward } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { WaveformPlayer } from "@/components/WaveformPlayer";
 import { useSpotifyPlayback } from "@/components/SpotifyPlayback";
 
@@ -38,7 +37,7 @@ export function IpodPlayer() {
         }}
       >
         {/* Pantalla */}
-        <div className="relative min-h-[11rem] overflow-hidden rounded-2xl border border-black/40 bg-gradient-to-b from-[#140d22] to-[#08060f] p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.8)]">
+        <div className="relative min-h-[11rem] overflow-hidden rounded-2xl border border-black/40 bg-gradient-to-b from-[#1d1410] to-[#0d0907] p-4 shadow-[inset_0_2px_14px_rgba(0,0,0,0.8)]">
           <div className="pointer-events-none absolute inset-0 opacity-30 [background:linear-gradient(120deg,rgba(255,255,255,0.12),transparent_40%)]" />
           <div className="flex items-center justify-between font-readout text-[0.62rem] font-bold uppercase tracking-widest text-teal/80">
             <span>Decaciones</span>
@@ -70,7 +69,7 @@ export function IpodPlayer() {
                   <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black bg-teal/80" />
                 </motion.div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-headline text-base font-black text-[#efeafa]">
+                  <p className="truncate font-headline text-base font-black text-[#f3ede2]">
                     {np.name}
                   </p>
                   <p className="truncate text-xs text-teal/70">{np.artist}</p>
@@ -97,19 +96,12 @@ export function IpodPlayer() {
             </>
           ) : (
             <div className="flex min-h-[8rem] flex-col items-center justify-center gap-3 text-center">
-              <p className="font-headline text-lg font-black text-[#efeafa]">
-                Nada sonando
+              <p className="font-display text-lg font-black italic text-[var(--gold)]">
+                Lista para sonar
               </p>
-              <p className="text-xs text-teal/60">
-                Busca una cancion y dale play para escucharla aqui.
+              <p className="text-xs text-muted">
+                Elija una decada aqui abajo y la rockola hace el resto.
               </p>
-              <Link
-                href="/search"
-                className="inline-flex items-center gap-2 rounded-full border border-teal/40 px-4 py-2 text-xs font-bold text-teal"
-              >
-                <Search className="h-4 w-4" aria-hidden="true" />
-                Buscar musica
-              </Link>
             </div>
           )}
         </div>

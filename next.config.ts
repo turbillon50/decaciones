@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return ["/decades", "/genres", "/player", "/search", "/favorites", "/spotify"].map(
+      (source) => ({ source, destination: "/", permanent: false }),
+    );
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "i.scdn.co" },
