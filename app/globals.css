@@ -1,69 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  /* Tokens de marca Decaciones — rockola DORADA (vinilo, laton, neon calido) */
-  --dec-black: #0c0905;
-  --dec-gold: #e9c349;
-  --dec-gold-deep: #b8901f;
-  --dec-cream: #f3e3b3;
+  /* Tokens de marca Decaciones — estilo Prince (morado sofisticado) */
+  --dec-black: #08060d;
+  --dec-violet: #a78bfa;
+  --dec-violet-deep: #6d3ad0;
+  --dec-mauve: #c4b5fd;
 
   /* ---- Tema OSCURO (default) ---- */
-  --background: #0c0905;
-  --foreground: #f2ecdd;
-  --surface: #171106;
-  --surface-2: #1d1508;
-  --surface-3: #2a1f0e;
-  --line: #3c2e12;
-  --line-soft: rgba(233, 195, 73, 0.14);
-  --primary: #e9c349;
-  --amber: #ffb74d;
-  --gold: #e9c349;
-  --teal: #46d9c8;
-  --rose: #e07a6b;
-  --muted: #9a8e72;
-  --shadow: rgba(10, 6, 2, 0.72);
+  --background: #08060d;
+  --foreground: #ece8f2;
+  --surface: #110c1a;
+  --surface-2: #160f22;
+  --surface-3: #1e1530;
+  --line: #2c2240;
+  --line-soft: rgba(180, 160, 255, 0.12);
+  --primary: #a78bfa;
+  --amber: #c4b5fd;
+  --gold: #b9a3f2;
+  --teal: #9d8be0;
+  --rose: #e07a99;
+  --muted: #8b8299;
+  --shadow: rgba(4, 2, 10, 0.72);
 
-  --chrome: rgba(18, 13, 5, 0.8);
-  --panel: rgba(44, 33, 14, 0.9);
-  --panel-2: rgba(22, 16, 7, 0.92);
-  --btn-1: #33260c;
-  --btn-2: #1c1306;
-  --mesh-a: rgba(233, 195, 73, 0.1);
-  --mesh-b: rgba(200, 140, 40, 0.08);
-  --mesh-c: rgba(255, 180, 80, 0.08);
-  --mesh-base-1: #130d05;
-  --mesh-base-2: #0c0905;
-  --mesh-base-3: #100a05;
+  --chrome: rgba(11, 8, 18, 0.8);
+  --panel: rgba(30, 22, 44, 0.9);
+  --panel-2: rgba(15, 11, 22, 0.92);
+  --btn-1: #221a33;
+  --btn-2: #120c1c;
+  --mesh-a: rgba(140, 110, 255, 0.1);
+  --mesh-b: rgba(110, 90, 200, 0.08);
+  --mesh-c: rgba(170, 140, 255, 0.08);
+  --mesh-base-1: #0c0813;
+  --mesh-base-2: #08060d;
+  --mesh-base-3: #0a0712;
 }
 
 /* ---- Tema CLARO ---- */
 :root.light {
-  --background: #f7f1e2;
-  --foreground: #241c0e;
+  --background: #f1edf7;
+  --foreground: #1a1424;
   --surface: #ffffff;
-  --surface-2: #f8efda;
-  --surface-3: #f0e3c4;
-  --line: #e3d4ab;
-  --line-soft: rgba(120, 90, 20, 0.16);
-  --primary: #a87d14;
-  --amber: #b3700f;
-  --gold: #a87d14;
-  --teal: #1f8378;
-  --rose: #c05a45;
-  --muted: #82765a;
-  --shadow: rgba(90, 65, 15, 0.16);
+  --surface-2: #f0eaf8;
+  --surface-3: #e6dcf3;
+  --line: #d8cce9;
+  --line-soft: rgba(70, 45, 110, 0.14);
+  --primary: #6d3ad0;
+  --amber: #7c4dd6;
+  --gold: #6a44c0;
+  --teal: #5a40b0;
+  --rose: #c0455f;
+  --muted: #6a6080;
+  --shadow: rgba(50, 30, 80, 0.16);
 
-  --chrome: rgba(255, 252, 244, 0.82);
+  --chrome: rgba(252, 250, 255, 0.82);
   --panel: rgba(255, 255, 255, 0.94);
-  --panel-2: rgba(250, 243, 228, 0.94);
+  --panel-2: rgba(244, 240, 250, 0.94);
   --btn-1: #ffffff;
-  --btn-2: #f3e8cd;
-  --mesh-a: rgba(233, 195, 73, 0.16);
-  --mesh-b: rgba(200, 145, 40, 0.12);
-  --mesh-c: rgba(255, 200, 100, 0.14);
-  --mesh-base-1: #faf4e6;
-  --mesh-base-2: #f5edda;
-  --mesh-base-3: #f0e6cd;
+  --btn-2: #ece4f6;
+  --mesh-a: rgba(140, 90, 240, 0.12);
+  --mesh-b: rgba(110, 70, 200, 0.1);
+  --mesh-c: rgba(170, 130, 250, 0.14);
+  --mesh-base-1: #f6f2fb;
+  --mesh-base-2: #efeaf7;
+  --mesh-base-3: #eae3f4;
 }
 
 @theme inline {
@@ -211,8 +211,8 @@ a {
 }
 
 ::selection {
-  background: rgba(233, 195, 73, 0.34);
-  color: #fbf6e8;
+  background: rgba(167, 139, 250, 0.34);
+  color: #f4f1fb;
 }
 
 ::-webkit-scrollbar {

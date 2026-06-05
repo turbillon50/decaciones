@@ -116,7 +116,7 @@ export function CommandMenu() {
 
   return (
     <>
-      {/* Boton central — dorado sobrio */}
+      {/* Boton central — violeta sobrio */}
       <div
         className="fixed inset-x-0 bottom-0 z-50 flex justify-center"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 18px)", paddingTop: 12 }}
