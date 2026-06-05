@@ -1,10 +1,10 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getCurrentSpotifyUser } from "@/lib/spotify";
+import { getSpotifySession } from "@/lib/spotify-session";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const accessToken = session?.token;
 
   if (!accessToken) {
     return NextResponse.json({ connected: false }, { status: 401 });

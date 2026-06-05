@@ -35,15 +35,17 @@ export async function saveSpotifyTokens(
   clerkId: string,
   accessToken: string,
   refreshToken?: string | null,
+  email?: string | null,
 ) {
   const db = getDb();
   if (!db) return;
-  await getOrCreateUser(clerkId);
+  await getOrCreateUser(clerkId, email);
   await db
     .update(users)
     .set({
       spotifyAccessToken: accessToken,
       ...(refreshToken ? { spotifyRefreshToken: refreshToken } : {}),
+      ...(email ? { email } : {}),
       spotifyConnectedAt: new Date(),
     })
     .where(eq(users.clerkId, clerkId));

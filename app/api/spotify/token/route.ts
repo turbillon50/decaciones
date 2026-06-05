@@ -1,17 +1,16 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getSpotifySession } from "@/lib/spotify-session";
 
 export const dynamic = "force-dynamic";
 
 // El Web Playback SDK necesita el access token en el cliente.
-// Es el token del propio usuario (su sesion de Spotify), por eso lo exponemos.
+// mode: "user" = sesion propia de Spotify | "preloaded" = cuenta host (rockola).
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
 
-  if (!token) {
-    return NextResponse.json({ token: null }, { status: 401 });
+  if (!session) {
+    return NextResponse.json({ token: null, mode: null }, { status: 401 });
   }
 
-  return NextResponse.json({ token });
+  return NextResponse.json({ token: session.token, mode: session.mode });
 }

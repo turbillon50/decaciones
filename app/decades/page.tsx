@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { AppleTVRail, RailItem } from "@/components/AppleTVRail";
-import { DecadePoster } from "@/components/DecadePoster";
+import { DecadeCoverFlow } from "@/components/DecadeCoverFlow";
 import { RecentPlaylists } from "@/components/RecentPlaylists";
 import { SlideIn } from "@/components/motion";
-import { decadeMeta } from "@/data/decades-meta";
 
 export const metadata: Metadata = { title: "Decadas" };
 
@@ -25,14 +23,10 @@ export default function DecadesPage() {
         </p>
       </SlideIn>
 
-      {/* Carrusel cinematografico (full-bleed) */}
-      <AppleTVRail>
-        {decadeMeta.map((meta) => (
-          <RailItem key={meta.id}>
-            <DecadePoster meta={meta} />
-          </RailItem>
-        ))}
-      </AppleTVRail>
+      {/* Cover Flow (selector central de la rockola) */}
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+        <DecadeCoverFlow />
+      </div>
 
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <RecentPlaylists />

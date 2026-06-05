@@ -1,13 +1,13 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { getSpotifySession } from "@/lib/spotify-session";
 
 export const dynamic = "force-dynamic";
 
 // Inicia reproduccion de uno o varios tracks en el dispositivo del Web Playback
 // SDK. Requiere Spotify Premium (lo exige el SDK).
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const token = session?.token;
   if (!token) {
     return NextResponse.json({ error: "spotify_not_connected" }, { status: 401 });
   }

@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { getSpotifySession } from "@/lib/spotify-session";
 import {
   addTracksToPlaylist,
   createPlaylist,
@@ -9,8 +9,8 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const accessToken = session?.token;
 
   if (!accessToken) {
     return NextResponse.json({ error: "spotify_not_connected" }, { status: 401 });

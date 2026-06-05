@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exchangeCodeForToken, getSpotifyCallbackUrl } from "@/lib/spotify";
+import { auth } from "@clerk/nextjs/server";
+import {
+  exchangeCodeForToken,
+  getCurrentSpotifyUser,
+  getSpotifyCallbackUrl,
+} from "@/lib/spotify";
+import { saveSpotifyTokens } from "@/lib/users";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -23,6 +29,26 @@ export async function GET(request: NextRequest) {
       code,
       getSpotifyCallbackUrl(request.url),
     );
+    // Persistimos tokens en DB: asi el modo PRECARGADO puede usar la cuenta
+    // host (Luis) aunque la cookie muera.
+    try {
+      const { userId } = await auth();
+      if (userId) {
+        const spotifyUser = await getCurrentSpotifyUser(token.access_token);
+        await saveSpotifyTokens(
+          userId,
+          token.access_token,
+          token.refresh_token,
+          spotifyUser.email,
+        );
+        console.log(
+          `[spotify] tokens guardados en DB para ${spotifyUser.email ?? userId}`,
+        );
+      }
+    } catch (persistError) {
+      console.error("[spotify] no se pudo persistir tokens", persistError);
+    }
+
     const response = NextResponse.redirect(
       new URL("/spotify?connected=true", url.origin),
     );

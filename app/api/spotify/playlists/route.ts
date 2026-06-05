@@ -1,6 +1,6 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { decades, genres, playlists } from "@/data/music";
+import { getSpotifySession } from "@/lib/spotify-session";
 import {
   addTracksToPlaylist,
   createPlaylist,
@@ -13,8 +13,8 @@ import type { Track } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const accessToken = session?.token;
 
   if (!accessToken) {
     return NextResponse.json({ playlists: [] }, { status: 401 });
@@ -76,8 +76,8 @@ function getPlaylistSource(sourceId: string): SpotifyPlaylistSource | null {
 }
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const accessToken = session?.token;
 
   if (!accessToken) {
     return NextResponse.json(

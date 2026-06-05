@@ -12,6 +12,7 @@ import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
 import { SpotifyPlaylistCreator } from "@/components/SpotifyPlaylistCreator";
 import { decades, genres, playlists } from "@/data/music";
 import { getCurrentSpotifyUser } from "@/lib/spotify";
+import { getSpotifySession } from "@/lib/spotify-session";
 import { saveSpotifyTokens } from "@/lib/users";
 
 export const metadata: Metadata = {
@@ -36,10 +37,16 @@ type SpotifyConnection = {
 
 async function getSpotifyConnection(): Promise<SpotifyConnection> {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
+  const session = await getSpotifySession();
+  const accessToken = session?.token;
 
   if (!accessToken) {
     return { isConnected: false, displayName: "" };
+  }
+
+  if (session?.mode === "preloaded") {
+    // Rockola precargada: suena la cuenta host sin pedir login de Spotify.
+    return { isConnected: true, displayName: "Rockola precargada" };
   }
 
   try {

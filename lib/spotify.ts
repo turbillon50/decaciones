@@ -444,3 +444,26 @@ export async function getUserPlaylists(
     owner: p.owner?.display_name ?? "",
   }));
 }
+
+/** Renueva el access token usando el refresh token (grant refresh_token). */
+export async function refreshAccessToken(refreshToken: string) {
+  const { clientId, clientSecret } = getSpotifyCredentials();
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString(
+    "base64",
+  );
+
+  const response = await fetch(tokenUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+    cache: "no-store",
+  });
+
+  return parseSpotifyResponse<SpotifyTokenResponse>(response);
+}
