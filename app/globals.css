@@ -437,3 +437,9 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+
+html,
+body {
+  overscroll-behavior-y: none;
+}
