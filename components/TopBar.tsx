@@ -24,7 +24,7 @@ export function TopBar() {
   const isHome = pathname === "/";
 
   return (
-    <header className="chrome-bar fixed left-0 top-0 z-50 w-full border-b border-line/40">
+    <header className="chrome-bar fixed left-0 top-0 z-50 w-full border-b border-line/40" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <button
           type="button"
