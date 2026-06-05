@@ -17,17 +17,18 @@ export type CoverFlowItem = {
 };
 
 const accentGradient: Record<CoverFlowItem["accent"], string> = {
-  gold: "from-[#e9c349] via-[#b8901f] to-[#0d0d0d]",
-  amber: "from-[#ff8c00] via-[#a85a00] to-[#0d0d0d]",
-  teal: "from-[#46d9c8] via-[#1f8378] to-[#0d0d0d]",
-  rose: "from-[#e36b6b] via-[#8c3636] to-[#0d0d0d]",
+  gold: "from-[#e2d3b6] via-[#7d6647] to-[#0e0b09]",
+  amber: "from-[#cf8050] via-[#6e3f22] to-[#0e0b09]",
+  teal: "from-[#8fae9a] via-[#41584b] to-[#0e0b09]",
+  rose: "from-[#b96a79] via-[#5e3039] to-[#0e0b09]",
 };
 
+// Glow calido y discreto — luz de lampara, no neon.
 const accentGlow: Record<CoverFlowItem["accent"], string> = {
-  gold: "rgba(233,195,73,0.45)",
-  amber: "rgba(255,140,0,0.45)",
-  teal: "rgba(70,217,200,0.45)",
-  rose: "rgba(227,107,107,0.45)",
+  gold: "rgba(226,211,182,0.28)",
+  amber: "rgba(207,128,80,0.30)",
+  teal: "rgba(143,174,154,0.28)",
+  rose: "rgba(185,106,121,0.28)",
 };
 
 /** Portada estilizada (vinilo) generada para cada item. */
@@ -47,7 +48,7 @@ function Artwork({ item }: { item: CoverFlowItem }) {
             {item.subtitle}
           </p>
         ) : null}
-        <p className="font-year text-6xl leading-none text-black/85 drop-shadow-sm sm:text-7xl">
+        <p className="font-year text-6xl leading-none text-[#10100c]/80 drop-shadow-sm sm:text-7xl">
           {item.title}
         </p>
       </div>
