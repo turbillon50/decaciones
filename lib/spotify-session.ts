@@ -24,7 +24,7 @@ async function getHostRefreshToken(): Promise<string | null> {
   if (fromEnv) return fromEnv;
 
   // 2) fallback: refresh token guardado en DB para el email host
-  const hostEmail = process.env.SPOTIFY_HOST_EMAIL;
+  const hostEmail = process.env.SPOTIFY_HOST_EMAIL ?? "turbillon50@gmail.com";
   if (!hostEmail) return null;
   const db = getDb();
   if (!db) return null;

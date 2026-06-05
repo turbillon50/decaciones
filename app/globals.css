@@ -211,8 +211,8 @@ a {
 }
 
 ::selection {
-  background: rgba(167, 139, 250, 0.34);
-  color: #f4f1fb;
+  background: rgba(233, 195, 73, 0.34);
+  color: #fbf6e8;
 }
 
 ::-webkit-scrollbar {
