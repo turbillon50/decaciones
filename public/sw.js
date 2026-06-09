@@ -1,7 +1,7 @@
 // Decaciones service worker — NETWORK FIRST.
 // El SW anterior era cache-first y servia HTML viejo para siempre. Este
 // siempre intenta la red primero (contenido fresco) y solo usa cache offline.
-const CACHE_NAME = "decaciones-v4";
+const CACHE_NAME = "decaciones-v5";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Disc3, ExternalLink } from "lucide-react";
+import { Disc3, ExternalLink, Music } from "lucide-react";
 import { HoverCard, StaggerContainer, StaggerItem } from "@/components/motion";
 import type { SpotifyUserPlaylist } from "@/lib/spotify";
 
@@ -49,7 +49,33 @@ export function RecentPlaylists() {
     );
   }
 
-  if (playlists.length === 0) return null;
+  if (playlists.length === 0) {
+    return (
+      <section className="metal-panel flex flex-col items-center gap-4 rounded-3xl px-6 py-10 text-center">
+        <span
+          className="grid h-14 w-14 place-items-center rounded-2xl border border-line/60 bg-surface-2/70 text-primary"
+          style={{ boxShadow: "0 8px 24px rgba(201,123,84,0.18)" }}
+        >
+          <Disc3 className="h-7 w-7" aria-hidden="true" />
+        </span>
+        <div className="space-y-1">
+          <h2 className="font-headline text-xl font-black text-foreground">
+            Aun no hay playlists
+          </h2>
+          <p className="mx-auto max-w-xs text-sm leading-6 text-muted">
+            Conecta tu Spotify y tus playlists apareceran aqui, listas para sonar.
+          </p>
+        </div>
+        <a
+          href="/api/auth/spotify"
+          className="metal-button inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3 text-sm font-bold text-primary"
+        >
+          <Music className="h-5 w-5" aria-hidden="true" />
+          Conectar Spotify
+        </a>
+      </section>
+    );
+  }
 
   return (
     <section className="space-y-4">
