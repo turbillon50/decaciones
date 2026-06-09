@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
 import { getCurrentSpotifyUser } from "@/lib/spotify";
 import { getSpotifySession } from "@/lib/spotify-session";
-import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
+import { SettingsPanel } from "@/components/SettingsPanel";
 
 export const metadata: Metadata = { title: "Ajustes" };
 export const dynamic = "force-dynamic";
 
+type Mode = "user" | "preloaded" | "none";
+
 export default async function SettingsPage() {
   const session = await getSpotifySession();
-  let detail = "Sin conexion";
+  let mode: Mode = "none";
+  let detail = "Conecta Spotify para llenar la rockola con tu propia musica.";
+
   if (session?.mode === "preloaded") {
-    detail = "Rockola precargada — su musica curada ya esta lista.";
+    mode = "preloaded";
+    detail = "Rockola precargada — tu musica curada ya esta lista para sonar.";
   } else if (session?.mode === "user") {
+    mode = "user";
     try {
       const user = await getCurrentSpotifyUser(session.token);
       detail = `Conectado como ${user.display_name || user.id}.`;
     } catch {
-      detail = "Sesion de Spotify con problemas. Conecte de nuevo.";
+      detail = "Tu sesion de Spotify tiene problemas. Conecta de nuevo.";
     }
   }
 
@@ -29,11 +35,8 @@ export default async function SettingsPage() {
         <h1 className="font-display text-4xl font-black italic leading-tight gold-text">
           Su rockola
         </h1>
-        <p className="text-base leading-7 text-muted">{detail}</p>
       </section>
-      <div className="flex justify-center">
-        <SpotifyConnectButton isConnected={session?.mode === "user"} />
-      </div>
+      <SettingsPanel mode={mode} detail={detail} />
     </main>
   );
 }
