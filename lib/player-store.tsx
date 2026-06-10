@@ -113,6 +113,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => { const a = audioRef.current; if (a) a.volume = volume; }, [volume]);
 
+  useEffect(() => {
+    const a = audioRef.current; if (!a) return;
+    const src = getTrackAudioSrc(currentTrack);
+    if (!a.src || !a.src.endsWith(src)) a.src = src;
+  }, [currentTrack]);
+
   const playTrack = useCallback((track: Track, nextQueue?: Track[]) => {
     const usable = nextQueue && nextQueue.some((i) => i.id === track.id) ? nextQueue : [track];
     setQueue(usable);
@@ -130,9 +136,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const togglePlay = useCallback(() => {
     const a = audioRef.current;
     if (!a) { setIsPlaying((v) => !v); return; }
+    const src = getTrackAudioSrc(currentTrack);
+    if (!a.src || !a.src.endsWith(src)) a.src = src;
     if (a.paused) a.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     else { a.pause(); setIsPlaying(false); }
-  }, []);
+  }, [currentTrack]);
 
   const toggleFavorite = useCallback((trackId = currentTrack.id) => {
     setFavorites((cur) => { const n = new Set(cur); if (n.has(trackId)) { n.delete(trackId); } else { n.add(trackId); } return n; });
