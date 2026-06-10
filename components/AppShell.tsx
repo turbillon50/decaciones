@@ -11,7 +11,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
   const isPlayer = pathname === "/player";
   return (
     <>
-      <main style={{ paddingBottom: isPlayer ? 0 : "calc(78px + env(safe-area-inset-bottom) + 96px)" }}>{children}</main>
+      <main style={{ maxWidth: isPlayer ? "100%" : 720, margin: "0 auto", paddingBottom: isPlayer ? 0 : "calc(78px + env(safe-area-inset-bottom) + 96px)" }}>{children}</main>
       {!isPlayer && <NowPlayingBar />}
       {!isPlayer && <BottomNav />}
     </>

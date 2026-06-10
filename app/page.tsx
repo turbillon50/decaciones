@@ -44,7 +44,7 @@ export default function Home() {
       <section className="float-in" style={{ padding: "10px 22px 0" }}>
         <motion.div whileTap={{ scale: 0.99 }} onClick={() => router.push("/player")}
           style={{ position: "relative", borderRadius: 30, overflow: "hidden", boxShadow: "var(--shadow)", cursor: "pointer" }}>
-          <img src={currentTrack.cover} alt="" style={{ width: "100%", aspectRatio: "1 / 1", objectFit: "cover", display: "block" }} />
+          <img src={currentTrack.cover} alt="" style={{ width: "100%", aspectRatio: "1 / 1", maxHeight: "60vh", objectFit: "cover", display: "block" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.82) 100%)" }} />
           <div style={{ position: "absolute", left: 22, right: 22, bottom: 22 }}>
             <div style={{ color: "var(--gold-2)", fontWeight: 700, fontSize: "calc(0.95rem * var(--fz))", letterSpacing: 1 }}>SONANDO AHORA</div>
