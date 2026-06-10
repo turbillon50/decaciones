@@ -11,7 +11,7 @@ export function MiniPlayer() {
     <div style={{
       position:"fixed",
       // 58px = altura del BottomNav; 8px de separación
-      bottom:"calc(58px + 8px)",
+      bottom:"66px",
       left:10, right:10,
       zIndex:90,
       maxWidth:480,
