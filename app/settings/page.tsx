@@ -1,80 +1,68 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Bell, Download, Music, Shield, SlidersHorizontal } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "Configuracion",
-};
+"use client";
+import { useRouter } from "next/navigation";
+import { useTheme } from "@/lib/theme";
+import { usePlayer } from "@/lib/player-store";
+import { useToast } from "@/lib/toast";
+import PageHeader from "@/components/PageHeader";
+import Icon from "@/components/Icon";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { mode, setMode, textSize, setTextSize } = useTheme();
+  const { sleepMinutes, startSleep, cancelSleep } = usePlayer();
+  const { notify } = useToast();
+  const sizes: { id: "normal" | "grande" | "enorme"; label: string }[] = [
+    { id: "normal", label: "Normal" }, { id: "grande", label: "Grande" }, { id: "enorme", label: "Enorme" },
+  ];
+  const Row = ({ children }: { children: React.ReactNode }) => (
+    <div className="glass" style={{ borderRadius: 20, padding: 18, marginBottom: 14 }}>{children}</div>
+  );
+  const Label = ({ icon, text }: { icon: any; text: string }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, fontWeight: 800, fontSize: "calc(1.2rem * var(--fz))" }}>
+      <span style={{ color: "var(--gold)" }}><Icon name={icon} size={26} /></span>{text}
+    </div>
+  );
+  const seg = (active: boolean) => ({ flex: 1, padding: "14px", borderRadius: 14, fontWeight: 700, fontSize: "calc(1rem * var(--fz))",
+    background: active ? "var(--gold)" : "var(--surface-2)", color: active ? "#1a1206" : "var(--text)" });
+
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pb-44 pt-24 sm:px-6 lg:pb-16">
-      <section className="space-y-3">
-        <p className="font-readout text-sm font-bold uppercase text-gold">
-          Cabina Decaciones
-        </p>
-        <h1 className="font-display text-4xl font-black leading-tight gold-text">
-          Ajusta la experiencia de tu rockola.
-        </h1>
-      </section>
-
-      <section className="grid gap-4">
-        {[
-          {
-            icon: Music,
-            title: "Modo analogico",
-            text: "Textura vinil, brillos ambar y controles grandes.",
-            action: "Activo",
-          },
-          {
-            icon: Bell,
-            title: "Recuerdos semanales",
-            text: "Una decada destacada para volver a escuchar.",
-            action: "Listo",
-          },
-          {
-            icon: Shield,
-            title: "Spotify seguro",
-            text: "Los secretos viven en variables de entorno.",
-            action: "Server-side",
-          },
-          {
-            icon: SlidersHorizontal,
-            title: "Salida principal",
-            text: "Salon principal con mezcla premium.",
-            action: "Estereo",
-          },
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <article
-              key={item.title}
-              className="flex items-center gap-4 rounded-2xl p-5 metal-panel"
-            >
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="font-display text-xl font-black text-foreground">
-                  {item.title}
-                </h2>
-                <p className="text-sm leading-6 text-muted">{item.text}</p>
-              </div>
-              <span className="hidden rounded-full border border-line/60 px-4 py-2 font-readout text-xs font-bold text-gold sm:inline-flex">
-                {item.action}
-              </span>
-            </article>
-          );
-        })}
-      </section>
-
-      <Link
-        href="/spotify"
-        className="metal-button inline-flex h-14 items-center justify-center gap-3 rounded-full px-7 text-base font-black text-primary"
-      >
-        <Download className="h-5 w-5" aria-hidden="true" />
-        Preparar Spotify
-      </Link>
-    </main>
+    <div>
+      <PageHeader title="Ajustes" subtitle="A tu medida" />
+      <div style={{ padding: "8px 22px" }}>
+        <Row>
+          <Label icon={mode === "night" ? "moon" : "sun"} text="Apariencia" />
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={() => setMode("night")} style={seg(mode === "night")}>🌙 Noche</button>
+            <button onClick={() => setMode("day")} style={seg(mode === "day")}>☀️ Día</button>
+          </div>
+        </Row>
+        <Row>
+          <Label icon="list" text="Tamaño del texto" />
+          <div style={{ display: "flex", gap: 10 }}>
+            {sizes.map((s) => <button key={s.id} onClick={() => setTextSize(s.id)} style={seg(textSize === s.id)}>{s.label}</button>)}
+          </div>
+        </Row>
+        <Row>
+          <Label icon="timer" text="Temporizador de sueño" />
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {[15, 30, 45, 60].map((m) => (
+              <button key={m} onClick={() => { startSleep(m); notify(`Se apagará en ${m} min`, "🌙"); }} style={{ ...seg(sleepMinutes === m), flex: "0 0 auto", minWidth: 80 }}>{m} min</button>
+            ))}
+            {sleepMinutes && <button onClick={() => { cancelSleep(); notify("Temporizador cancelado"); }} style={{ ...seg(false), flex: "0 0 auto" }}>Apagar</button>}
+          </div>
+        </Row>
+        <button onClick={() => router.push("/bluetooth")} className="glass" style={{ width: "100%", borderRadius: 20, padding: 20, display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
+          <span style={{ color: "var(--gold)" }}><Icon name="bluetooth" size={26} /></span>
+          <span style={{ fontWeight: 800, fontSize: "calc(1.2rem * var(--fz))", flex: 1, textAlign: "left" }}>Conectar bocina Bluetooth</span>
+          <Icon name="chevronRight" size={22} style={{ color: "var(--text-soft)" }} />
+        </button>
+        <button onClick={() => router.push("/radio")} className="glass" style={{ width: "100%", borderRadius: 20, padding: 20, display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={{ color: "var(--gold)" }}><Icon name="radio" size={26} /></span>
+          <span style={{ fontWeight: 800, fontSize: "calc(1.2rem * var(--fz))", flex: 1, textAlign: "left" }}>Radio por década</span>
+          <Icon name="chevronRight" size={22} style={{ color: "var(--text-soft)" }} />
+        </button>
+        <div style={{ textAlign: "center", color: "var(--text-soft)", fontSize: "calc(0.9rem * var(--fz))", marginTop: 26 }}>Decaciones · La música de tu vida</div>
+      </div>
+    </div>
   );
 }

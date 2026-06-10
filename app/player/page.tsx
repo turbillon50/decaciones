@@ -1,137 +1,162 @@
 "use client";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePlayer, formatTime } from "@/lib/player-store";
+import { useToast } from "@/lib/toast";
+import { getLyrics } from "@/data/lyrics";
+import Icon from "@/components/Icon";
+import Vinyl from "@/components/Vinyl";
+import PinchImage from "@/components/PinchImage";
+
+type View = "disco" | "portada" | "letra";
+const sleepOptions = [15, 30, 45, 60];
 
 export default function PlayerPage() {
+  const router = useRouter();
+  const { notify } = useToast();
   const {
-    currentTrack, isPlaying, progress, duration,
-    volume, shuffleEnabled, repeatEnabled,
-    togglePlay, nextTrack, previousTrack,
-    setProgress, setVolume, toggleShuffle, toggleRepeat,
-    toggleFavorite, isFavorite,
+    currentTrack, isPlaying, togglePlay, nextTrack, previousTrack,
+    progress, duration, setProgress, shuffleEnabled, repeatEnabled,
+    toggleShuffle, toggleRepeat, toggleFavorite, isFavorite,
+    sleepMinutes, startSleep, cancelSleep,
   } = usePlayer();
 
-  const pct = Math.min(100, (progress / (duration || currentTrack.durationSeconds || 1)) * 100);
+  const [view, setView] = useState<View>("disco");
+  const [sleepOpen, setSleepOpen] = useState(false);
+  const lyrics = useMemo(() => getLyrics(currentTrack.id), [currentTrack.id]);
   const fav = isFavorite(currentTrack.id);
+  const size = 320;
 
-  function seek(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = (e.clientX - rect.left) / rect.width;
-    setProgress(ratio * (duration || currentTrack.durationSeconds));
-  }
+  const activeLine = useMemo(() => {
+    if (!lyrics) return -1;
+    let idx = 0;
+    for (let i = 0; i < lyrics.length; i++) if (progress >= lyrics[i].t) idx = i;
+    return idx;
+  }, [lyrics, progress]);
+
+  const lyricRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = lyricRef.current?.querySelector<HTMLElement>(`[data-i="${activeLine}"]`);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [activeLine]);
 
   return (
-    <main style={{
-      background:"#000",minHeight:"100vh",
-      display:"flex",flexDirection:"column",
-      padding:"env(safe-area-inset-top, 48px) 28px 40px",
-    }}>
-      {/* Back button */}
-      <div style={{marginBottom:24,paddingTop:8}}>
-        <Link href="/" style={{display:"inline-flex",alignItems:"center",gap:6,textDecoration:"none",color:"rgba(255,255,255,0.6)"}}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          <span style={{fontSize:14,fontWeight:500}}>Ahora</span>
-        </Link>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column",
+      padding: "calc(env(safe-area-inset-top) + 14px) 22px calc(env(safe-area-inset-bottom) + 24px)",
+      background: "radial-gradient(120% 70% at 50% 0%, var(--bg-2) 0%, var(--bg) 65%)" }}>
+      {/* header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <button className="tap" onClick={() => router.back()} aria-label="Cerrar"><Icon name="chevronDown" size={30} /></button>
+        <div style={{ textAlign: "center", fontWeight: 700, fontSize: "calc(0.95rem * var(--fz))", color: "var(--text-soft)" }}>REPRODUCIENDO</div>
+        <button className="tap" onClick={() => { toggleFavorite(currentTrack.id); notify(fav ? "Quitado de favoritos" : "Agregado a favoritos", fav ? "♡" : "♥"); }}
+          aria-label="Favorito" style={{ color: fav ? "var(--gold)" : "var(--text)" }}>
+          <Icon name={fav ? "heartFilled" : "heart"} size={28} />
+        </button>
       </div>
 
-      {/* Artwork — grande como Apple Music */}
-      <div style={{
-        width:"100%",aspectRatio:"1/1",borderRadius:20,overflow:"hidden",
-        boxShadow:"0 30px 70px rgba(0,0,0,0.8)",marginBottom:32,
-        transform: isPlaying ? "scale(1)" : "scale(0.94)",
-        transition:"transform 0.4s cubic-bezier(.2,.8,.4,1)",
-        flexShrink:0,
-      }}>
-        <img src={currentTrack.cover} alt={currentTrack.title}
-          onError={e=>{(e.target as HTMLImageElement).src="/images/hero.jpg";}}
-          style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+      {/* selector de vista */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 8, margin: "12px 0 6px" }}>
+        {(["disco", "portada", "letra"] as View[]).map((v) => (
+          <button key={v} onClick={() => setView(v)} className={view === v ? "" : "glass"}
+            style={{ padding: "10px 18px", borderRadius: 999, fontWeight: 700, fontSize: "calc(0.9rem * var(--fz))", textTransform: "capitalize",
+              background: view === v ? "var(--gold)" : undefined, color: view === v ? "#1a1206" : "var(--text)" }}>
+            {v === "disco" ? "Disco" : v === "portada" ? "Portada" : "Letra"}
+          </button>
+        ))}
       </div>
 
-      {/* Track info */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-        <div>
-          <div style={{fontSize:22,fontWeight:700,color:"#fff",letterSpacing:"-0.02em"}}>{currentTrack.title}</div>
-          <div style={{fontSize:16,color:"rgba(255,255,255,0.5)",marginTop:4}}>{currentTrack.artist}</div>
+      {/* área visual */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", minHeight: size + 20 }}>
+        <AnimatePresence mode="wait">
+          {view === "disco" && (
+            <motion.div key="disco" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <Vinyl cover={currentTrack.cover} size={size} spinning={isPlaying} />
+            </motion.div>
+          )}
+          {view === "portada" && (
+            <motion.div key="portada" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <PinchImage src={currentTrack.cover} size={size} />
+            </motion.div>
+          )}
+          {view === "letra" && (
+            <motion.div key="letra" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              ref={lyricRef} style={{ height: size + 20, overflowY: "auto", width: "100%", padding: "20px 0", maskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)" }}>
+              {lyrics ? lyrics.map((l, i) => (
+                <div key={i} data-i={i} style={{ textAlign: "center", padding: "12px 10px", fontWeight: i === activeLine ? 800 : 600,
+                  fontSize: i === activeLine ? "calc(1.7rem * var(--fz))" : "calc(1.25rem * var(--fz))",
+                  color: i === activeLine ? "var(--gold)" : "var(--text-soft)", transition: "all .3s ease" }}>{l.text}</div>
+              )) : (
+                <div style={{ textAlign: "center", color: "var(--text-soft)", fontSize: "calc(1.2rem * var(--fz))", marginTop: 40 }}>
+                  <Icon name="mic" size={40} style={{ opacity: 0.5 }} /><div style={{ marginTop: 12 }}>Letra no disponible para esta canción</div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* título */}
+      <div style={{ textAlign: "center", marginTop: 8 }}>
+        <div style={{ fontWeight: 900, fontSize: "calc(2rem * var(--fz))", lineHeight: 1.08 }}>{currentTrack.title}</div>
+        <div style={{ color: "var(--text-soft)", fontSize: "calc(1.2rem * var(--fz))", marginTop: 4 }}>{currentTrack.artist}</div>
+        <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginTop: 2 }}>{currentTrack.album} · {currentTrack.year}</div>
+      </div>
+
+      {/* progreso */}
+      <div style={{ marginTop: 18 }}>
+        <input type="range" min={0} max={duration || 24} step={0.1} value={progress}
+          onChange={(e) => setProgress(Number(e.target.value))}
+          style={{ width: "100%", height: 14, accentColor: "var(--gold)" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--text-soft)", fontSize: "calc(0.9rem * var(--fz))" }}>
+          <span>{formatTime(progress)}</span><span>{formatTime(duration)}</span>
         </div>
-        <button onClick={()=>toggleFavorite(currentTrack.id)} style={{background:"none",border:"none",cursor:"pointer",padding:8}}>
-          <svg width="26" height="26" viewBox="0 0 24 24">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-              fill={fav?"#ff3b30":"none"} stroke={fav?"#ff3b30":"rgba(255,255,255,0.4)"} strokeWidth="1.8"/>
-          </svg>
+      </div>
+
+      {/* controles grandes */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 14 }}>
+        <button className="tap" onClick={toggleShuffle} style={{ color: shuffleEnabled ? "var(--gold)" : "var(--text-soft)" }}><Icon name="shuffle" size={26} /></button>
+        <button className="tap" onClick={previousTrack}><Icon name="prev" size={40} /></button>
+        <motion.button whileTap={{ scale: 0.92 }} onClick={togglePlay}
+          style={{ width: 92, height: 92, borderRadius: "50%", background: "var(--gold)", color: "#1a1206", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 14px 36px rgba(0,0,0,0.4)" }}>
+          <Icon name={isPlaying ? "pause" : "play"} size={44} />
+        </motion.button>
+        <button className="tap" onClick={nextTrack}><Icon name="next" size={40} /></button>
+        <button className="tap" onClick={toggleRepeat} style={{ color: repeatEnabled ? "var(--gold)" : "var(--text-soft)" }}><Icon name="repeat" size={26} /></button>
+      </div>
+
+      {/* sleep timer */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+        <button onClick={() => setSleepOpen(true)} className="glass"
+          style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 20px", borderRadius: 999, fontWeight: 700, fontSize: "calc(0.95rem * var(--fz))", color: sleepMinutes ? "var(--gold)" : "var(--text)" }}>
+          <Icon name="timer" size={22} /> {sleepMinutes ? `Apagar en ${sleepMinutes} min` : "Temporizador de sueño"}
         </button>
       </div>
 
-      {/* Seek bar */}
-      <div style={{marginBottom:8}}>
-        <div onClick={seek} style={{
-          height:4,borderRadius:2,background:"rgba(255,255,255,0.15)",cursor:"pointer",position:"relative",
-        }}>
-          <div style={{position:"absolute",left:0,top:0,height:"100%",borderRadius:2,background:"#fff",width:`${pct}%`,transition:"width 0.3s linear"}}/>
-        </div>
-        <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}>
-          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>{formatTime(progress)}</span>
-          <span style={{fontSize:11,color:"rgba(255,255,255,0.35)"}}>-{formatTime((duration||currentTrack.durationSeconds)-progress)}</span>
-        </div>
-      </div>
-
-      {/* Main controls */}
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:32}}>
-        <button onClick={toggleShuffle} style={{
-          background:"none",border:"none",cursor:"pointer",padding:8,
-          color: shuffleEnabled ? "#fff" : "rgba(255,255,255,0.3)",
-        }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
-            <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
-            <line x1="4" y1="4" x2="9" y2="9"/>
-          </svg>
-        </button>
-        <button onClick={()=>previousTrack()} style={{background:"none",border:"none",cursor:"pointer",padding:8,color:"#fff"}}>
-          <svg width="34" height="34" viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20" fill="currentColor"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        </button>
-        <button onClick={togglePlay} style={{
-          width:68,height:68,borderRadius:"50%",border:"none",cursor:"pointer",
-          background:"#fff",display:"flex",alignItems:"center",justifyContent:"center",
-          boxShadow:"0 8px 24px rgba(255,255,255,0.2)",
-        }}>
-          {isPlaying
-            ? <svg width="24" height="24" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="#000"/><rect x="14" y="4" width="4" height="16" fill="#000"/></svg>
-            : <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="#000"/></svg>
-          }
-        </button>
-        <button onClick={()=>nextTrack()} style={{background:"none",border:"none",cursor:"pointer",padding:8,color:"#fff"}}>
-          <svg width="34" height="34" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        </button>
-        <button onClick={toggleRepeat} style={{
-          background:"none",border:"none",cursor:"pointer",padding:8,
-          color: repeatEnabled ? "#fff" : "rgba(255,255,255,0.3)",
-        }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-          </svg>
-        </button>
-      </div>
-
-      {/* Volume */}
-      <div style={{display:"flex",alignItems:"center",gap:12}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-        </svg>
-        <div style={{flex:1,height:4,borderRadius:2,background:"rgba(255,255,255,0.15)",cursor:"pointer",position:"relative"}}
-          onClick={e=>{
-            const r = e.currentTarget.getBoundingClientRect();
-            setVolume(Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)));
-          }}>
-          <div style={{position:"absolute",left:0,top:0,height:"100%",borderRadius:2,background:"rgba(255,255,255,0.6)",width:`${volume*100}%`}}/>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-        </svg>
-      </div>
-    </main>
+      {/* popup sleep */}
+      <AnimatePresence>
+        {sleepOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setSleepOpen(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 100, display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <motion.div initial={{ y: 260 }} animate={{ y: 0 }} exit={{ y: 260 }} transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              onClick={(e) => e.stopPropagation()} className="glass"
+              style={{ width: "100%", maxWidth: 480, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "24px 22px calc(env(safe-area-inset-bottom) + 24px)" }}>
+              <div style={{ fontWeight: 800, fontSize: "calc(1.3rem * var(--fz))", marginBottom: 16 }}>Temporizador de sueño</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {sleepOptions.map((m) => (
+                  <button key={m} onClick={() => { startSleep(m); setSleepOpen(false); notify(`Se apagará en ${m} minutos`, "🌙"); }}
+                    className="glass" style={{ padding: "18px", borderRadius: 18, fontWeight: 700, fontSize: "calc(1.1rem * var(--fz))" }}>{m} min</button>
+                ))}
+              </div>
+              {sleepMinutes && (
+                <button onClick={() => { cancelSleep(); setSleepOpen(false); notify("Temporizador cancelado"); }}
+                  style={{ width: "100%", marginTop: 14, padding: 16, borderRadius: 18, background: "var(--surface-2)", fontWeight: 700, fontSize: "calc(1.05rem * var(--fz))" }}>Cancelar</button>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

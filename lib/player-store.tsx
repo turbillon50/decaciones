@@ -1,15 +1,8 @@
 "use client";
-
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
 } from "react";
-import { defaultQueue } from "@/data/music";
+import { defaultQueue, tracks as allTracks } from "@/data/music";
 import { getTrackAudioSrc } from "@/lib/audio";
 import type { Track } from "@/lib/types";
 
@@ -23,6 +16,8 @@ type PlayerContextValue = {
   shuffleEnabled: boolean;
   repeatEnabled: boolean;
   favorites: Set<string>;
+  sleepMinutes: number | null;
+  sleepEndsAt: number | null;
   playTrack: (track: Track, queue?: Track[]) => void;
   togglePlay: () => void;
   nextTrack: () => void;
@@ -33,300 +28,186 @@ type PlayerContextValue = {
   setVolume: (value: number) => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
+  startSleep: (minutes: number) => void;
+  cancelSleep: () => void;
 };
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
-
 const favoritesKey = "decaciones:favorites";
+const resumeKey = "decaciones:resume";
 const demoFallbackDuration = 24;
 
 function pickNextTrack(queue: Track[], currentTrack: Track, shuffle: boolean) {
-  if (!queue.length) {
-    return currentTrack;
-  }
-
+  if (!queue.length) return currentTrack;
   if (shuffle && queue.length > 1) {
-    const candidates = queue.filter((track) => track.id !== currentTrack.id);
+    const candidates = queue.filter((t) => t.id !== currentTrack.id);
     return candidates[Math.floor(Math.random() * candidates.length)] ?? currentTrack;
   }
-
-  const currentIndex = queue.findIndex((item) => item.id === currentTrack.id);
-  const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % queue.length;
-  return queue[nextIndex] ?? currentTrack;
+  const i = queue.findIndex((it) => it.id === currentTrack.id);
+  const n = i < 0 ? 0 : (i + 1) % queue.length;
+  return queue[n] ?? currentTrack;
 }
-
 function pickPreviousTrack(queue: Track[], currentTrack: Track) {
-  if (!queue.length) {
-    return currentTrack;
-  }
-
-  const currentIndex = queue.findIndex((item) => item.id === currentTrack.id);
-  const previousIndex = currentIndex <= 0 ? queue.length - 1 : currentIndex - 1;
-  return queue[previousIndex] ?? currentTrack;
+  if (!queue.length) return currentTrack;
+  const i = queue.findIndex((it) => it.id === currentTrack.id);
+  const p = i <= 0 ? queue.length - 1 : i - 1;
+  return queue[p] ?? currentTrack;
 }
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const sleepRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [queue, setQueue] = useState<Track[]>(defaultQueue);
   const [currentTrack, setCurrentTrack] = useState<Track>(defaultQueue[0]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgressState] = useState(0);
   const [duration, setDuration] = useState(demoFallbackDuration);
-  const [volume, setVolumeState] = useState(0.82);
+  const [volume, setVolumeState] = useState(0.85);
   const [shuffleEnabled, setShuffleEnabled] = useState(false);
   const [repeatEnabled, setRepeatEnabled] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [sleepMinutes, setSleepMinutes] = useState<number | null>(null);
+  const [sleepEndsAt, setSleepEndsAt] = useState<number | null>(null);
 
   const playAudioTrack = useCallback((track: Track, shouldPlay = true) => {
     const audio = audioRef.current;
     setCurrentTrack(track);
     setProgressState(0);
-    setDuration(demoFallbackDuration);
-
-    if (!audio) {
-      setIsPlaying(shouldPlay);
-      return;
-    }
-
-    const src = getTrackAudioSrc(track) ?? '';
-    if (!audio.src.endsWith(src)) {
-      audio.src = src;
-    }
+    if (!audio) { setIsPlaying(shouldPlay); return; }
+    const src = getTrackAudioSrc(track);
+    if (!audio.src.endsWith(src)) audio.src = src;
     audio.currentTime = 0;
     audio.volume = volume;
-
     if (shouldPlay) {
-      const playPromise = audio.play();
-      if (playPromise) {
-        playPromise
-          .then(() => setIsPlaying(true))
-          .catch(() => setIsPlaying(false));
-      } else {
-        setIsPlaying(true);
+      const p = audio.play();
+      if (p) p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      else setIsPlaying(true);
+    } else { audio.pause(); setIsPlaying(false); }
+  }, [volume]);
+
+  // restaurar "continuar donde se quedó" (sin autoplay)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(resumeKey);
+      if (raw) {
+        const { id, pos } = JSON.parse(raw) as { id: string; pos: number };
+        const t = allTracks.find((x) => x.id === id);
+        if (t) {
+          setCurrentTrack(t);
+          const audio = audioRef.current;
+          if (audio) {
+            audio.src = getTrackAudioSrc(t);
+            const onMeta = () => { audio.currentTime = pos || 0; setProgressState(pos || 0); audio.removeEventListener("loadedmetadata", onMeta); };
+            audio.addEventListener("loadedmetadata", onMeta);
+          }
+        }
       }
-    } else {
-      audio.pause();
-      setIsPlaying(false);
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    const _src = getTrackAudioSrc(currentTrack) ?? '';
-    if (audio && !audio.src.endsWith(_src)) {
-      audio.src = _src;
-    }
-  }, [currentTrack]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = volume;
-    }
-  }, [volume]);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(favoritesKey);
-    if (stored) {
-      window.requestAnimationFrame(() => {
-        setFavorites(new Set(JSON.parse(stored) as string[]));
-      });
-    }
+    } catch {}
+    const fav = localStorage.getItem(favoritesKey);
+    if (fav) setFavorites(new Set(JSON.parse(fav) as string[]));
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(
-      favoritesKey,
-      JSON.stringify(Array.from(favorites)),
-    );
+    localStorage.setItem(favoritesKey, JSON.stringify(Array.from(favorites)));
   }, [favorites]);
 
-  const playTrack = useCallback(
-    (track: Track, nextQueue?: Track[]) => {
-      const usableQueue =
-        nextQueue && nextQueue.some((item) => item.id === track.id)
-          ? nextQueue
-          : [track];
-      setQueue(usableQueue);
-      playAudioTrack(track, true);
-    },
-    [playAudioTrack],
-  );
+  useEffect(() => { const a = audioRef.current; if (a) a.volume = volume; }, [volume]);
+
+  const playTrack = useCallback((track: Track, nextQueue?: Track[]) => {
+    const usable = nextQueue && nextQueue.some((i) => i.id === track.id) ? nextQueue : [track];
+    setQueue(usable);
+    playAudioTrack(track, true);
+  }, [playAudioTrack]);
 
   const nextTrack = useCallback(() => {
-    const next = pickNextTrack(queue, currentTrack, shuffleEnabled);
-    playAudioTrack(next, true);
+    playAudioTrack(pickNextTrack(queue, currentTrack, shuffleEnabled), true);
   }, [currentTrack, playAudioTrack, queue, shuffleEnabled]);
 
   const previousTrack = useCallback(() => {
-    const previous = pickPreviousTrack(queue, currentTrack);
-    playAudioTrack(previous, true);
+    playAudioTrack(pickPreviousTrack(queue, currentTrack), true);
   }, [currentTrack, playAudioTrack, queue]);
 
   const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      setIsPlaying((value) => !value);
-      return;
-    }
-
-    if (audio.paused) {
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    } else {
-      audio.pause();
-      setIsPlaying(false);
-    }
+    const a = audioRef.current;
+    if (!a) { setIsPlaying((v) => !v); return; }
+    if (a.paused) a.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    else { a.pause(); setIsPlaying(false); }
   }, []);
 
-  const toggleFavorite = useCallback(
-    (trackId = currentTrack.id) => {
-      setFavorites((current) => {
-        const next = new Set(current);
-        if (next.has(trackId)) {
-          next.delete(trackId);
-        } else {
-          next.add(trackId);
-        }
-        return next;
-      });
-    },
-    [currentTrack.id],
-  );
+  const toggleFavorite = useCallback((trackId = currentTrack.id) => {
+    setFavorites((cur) => { const n = new Set(cur); if (n.has(trackId)) { n.delete(trackId); } else { n.add(trackId); } return n; });
+  }, [currentTrack.id]);
 
-  const isFavorite = useCallback(
-    (trackId = currentTrack.id) => favorites.has(trackId),
-    [currentTrack.id, favorites],
-  );
+  const isFavorite = useCallback((trackId = currentTrack.id) => favorites.has(trackId), [currentTrack.id, favorites]);
 
-  const setProgress = useCallback(
-    (value: number) => {
-      const audio = audioRef.current;
-      const maxDuration = duration || demoFallbackDuration;
-      const nextValue = Math.max(0, Math.min(value, maxDuration));
-      if (audio) {
-        audio.currentTime = nextValue;
-      }
-      setProgressState(nextValue);
-    },
-    [duration],
-  );
+  const setProgress = useCallback((value: number) => {
+    const a = audioRef.current; const max = duration || demoFallbackDuration;
+    const v = Math.max(0, Math.min(value, max));
+    if (a) a.currentTime = v; setProgressState(v);
+  }, [duration]);
 
   const setVolume = useCallback((value: number) => {
-    const nextVolume = Math.max(0, Math.min(value, 1));
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = nextVolume;
-    }
-    setVolumeState(nextVolume);
+    const v = Math.max(0, Math.min(value, 1)); const a = audioRef.current; if (a) a.volume = v; setVolumeState(v);
   }, []);
 
-  const toggleShuffle = useCallback(() => {
-    setShuffleEnabled((value) => !value);
-  }, []);
+  const toggleShuffle = useCallback(() => setShuffleEnabled((v) => !v), []);
+  const toggleRepeat = useCallback(() => setRepeatEnabled((v) => !v), []);
 
-  const toggleRepeat = useCallback(() => {
-    setRepeatEnabled((value) => !value);
+  const cancelSleep = useCallback(() => {
+    if (sleepRef.current) clearTimeout(sleepRef.current);
+    sleepRef.current = null; setSleepMinutes(null); setSleepEndsAt(null);
+  }, []);
+  const startSleep = useCallback((minutes: number) => {
+    if (sleepRef.current) clearTimeout(sleepRef.current);
+    setSleepMinutes(minutes); setSleepEndsAt(Date.now() + minutes * 60000);
+    sleepRef.current = setTimeout(() => {
+      const a = audioRef.current; if (a) a.pause(); setIsPlaying(false);
+      setSleepMinutes(null); setSleepEndsAt(null);
+    }, minutes * 60000);
   }, []);
 
   const handleLoadedMetadata = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio?.duration && Number.isFinite(audio.duration)) {
-      setDuration(audio.duration);
-    }
+    const a = audioRef.current;
+    if (a?.duration && Number.isFinite(a.duration)) setDuration(a.duration);
   }, []);
-
   const handleTimeUpdate = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      setProgressState(audio.currentTime);
+    const a = audioRef.current;
+    if (a) {
+      setProgressState(a.currentTime);
+      try { localStorage.setItem(resumeKey, JSON.stringify({ id: currentTrack.id, pos: a.currentTime })); } catch {}
     }
-  }, []);
-
+  }, [currentTrack.id]);
   const handleEnded = useCallback(() => {
-    const audio = audioRef.current;
-    if (repeatEnabled && audio) {
-      audio.currentTime = 0;
-      audio.play().catch(() => setIsPlaying(false));
-      return;
-    }
+    const a = audioRef.current;
+    if (repeatEnabled && a) { a.currentTime = 0; a.play().catch(() => setIsPlaying(false)); return; }
     nextTrack();
   }, [nextTrack, repeatEnabled]);
 
-  const value = useMemo(
-    () => ({
-      currentTrack,
-      queue,
-      isPlaying,
-      progress,
-      duration,
-      volume,
-      shuffleEnabled,
-      repeatEnabled,
-      favorites,
-      playTrack,
-      togglePlay,
-      nextTrack,
-      previousTrack,
-      toggleFavorite,
-      isFavorite,
-      setProgress,
-      setVolume,
-      toggleShuffle,
-      toggleRepeat,
-    }),
-    [
-      currentTrack,
-      duration,
-      favorites,
-      isFavorite,
-      isPlaying,
-      nextTrack,
-      playTrack,
-      previousTrack,
-      progress,
-      queue,
-      repeatEnabled,
-      setProgress,
-      setVolume,
-      shuffleEnabled,
-      toggleFavorite,
-      togglePlay,
-      toggleRepeat,
-      toggleShuffle,
-      volume,
-    ],
-  );
+  const value = useMemo(() => ({
+    currentTrack, queue, isPlaying, progress, duration, volume,
+    shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt,
+    playTrack, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite,
+    setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep,
+  }), [currentTrack, queue, isPlaying, progress, duration, volume, shuffleEnabled, repeatEnabled,
+    favorites, sleepMinutes, sleepEndsAt, playTrack, togglePlay, nextTrack, previousTrack,
+    toggleFavorite, isFavorite, setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep]);
 
   return (
     <PlayerContext.Provider value={value}>
-      <audio
-        ref={audioRef}
-        preload="metadata"
-        onLoadedMetadata={handleLoadedMetadata}
-        onTimeUpdate={handleTimeUpdate}
-        onEnded={handleEnded}
-      />
+      <audio ref={audioRef} preload="metadata" onLoadedMetadata={handleLoadedMetadata} onTimeUpdate={handleTimeUpdate} onEnded={handleEnded} />
       {children}
     </PlayerContext.Provider>
   );
 }
 
 export function usePlayer() {
-  const context = useContext(PlayerContext);
-  if (!context) {
-    throw new Error("usePlayer must be used inside PlayerProvider");
-  }
-  return context;
+  const c = useContext(PlayerContext);
+  if (!c) throw new Error("usePlayer dentro de PlayerProvider");
+  return c;
 }
-
 export function formatTime(totalSeconds: number) {
-  const safeSeconds = Number.isFinite(totalSeconds) ? totalSeconds : 0;
-  const minutes = Math.floor(safeSeconds / 60);
-  const seconds = Math.floor(safeSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  const s = Number.isFinite(totalSeconds) ? totalSeconds : 0;
+  const m = Math.floor(s / 60); const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
-
 export const usePlayerContext = usePlayer;
