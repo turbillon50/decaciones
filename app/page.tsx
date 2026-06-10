@@ -1,91 +1,188 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { Sparkles, Music, Disc3 } from "lucide-react";
-import { DecadeCard } from "@/components/DecadeCard";
-import { GenreCard } from "@/components/GenreCard";
-import { PlaylistCard } from "@/components/PlaylistCard";
-import { decades, genres, playlists as staticPlaylists } from "@/data/music";
-import { useDemoMode } from "@/lib/demo-context";
+import Link from "next/link";
+import { decades, genres, playlists } from "@/data/music";
+import { usePlayer } from "@/lib/player-store";
+import type { Decade, Genre, Playlist } from "@/lib/types";
+
+/* ─── Colores Apple TV ─────────────────────────── */
+const C = {
+  bg: "#000",
+  card: "rgba(28,28,28,0.95)",
+  cardHover: "rgba(38,38,38,0.98)",
+  border: "rgba(255,255,255,0.08)",
+  fg: "#fff",
+  fg2: "rgba(255,255,255,0.55)",
+  fg3: "rgba(255,255,255,0.28)",
+  accent: "#fff",
+  green: "#1DB954",
+};
+
+function ImgCard({ src, alt, width, height, radius = 14, children }: {
+  src: string; alt: string; width: number|string; height: number|string; radius?: number; children?: React.ReactNode;
+}) {
+  const [s, setS] = useState(src);
+  return (
+    <div style={{
+      position:"relative", width, height, borderRadius:radius,
+      overflow:"hidden", background:"#111", flexShrink:0,
+      transition:"transform 0.22s cubic-bezier(.2,.8,.4,1), box-shadow 0.22s ease",
+      cursor:"pointer",
+    }}
+    onMouseEnter={e=>{
+      (e.currentTarget as HTMLElement).style.transform = "scale(1.04)";
+      (e.currentTarget as HTMLElement).style.boxShadow = "0 20px 50px rgba(0,0,0,0.7)";
+    }}
+    onMouseLeave={e=>{
+      (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+      (e.currentTarget as HTMLElement).style.boxShadow = "none";
+    }}>
+      <img src={s} alt={alt}
+        onError={()=>setS("/images/hero.jpg")}
+        style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+      <div style={{
+        position:"absolute",inset:0,
+        background:"linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)",
+      }}/>
+      {children}
+    </div>
+  );
+}
+
+function Shelf({ title, link, children }: { title:string; link?:string; children:React.ReactNode }) {
+  return (
+    <section style={{marginBottom:40}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px",marginBottom:14}}>
+        <h2 style={{fontSize:20,fontWeight:700,letterSpacing:"-0.025em",color:C.fg}}>{title}</h2>
+        {link && <Link href={link} style={{fontSize:13,color:C.fg3,textDecoration:"none",fontWeight:500}}>Ver todo</Link>}
+      </div>
+      <div style={{
+        display:"flex", gap:12, overflowX:"auto", padding:"4px 20px 8px",
+        scrollSnapType:"x mandatory",
+      }}>
+        {children}
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
-  const { mode } = useDemoMode();
-  const [dbTracks, setDbTracks] = useState<any[]>([]);
-  const [dbPlaylists, setDbPlaylists] = useState<any[]>([]);
+  const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer();
+  const [nTracks, setNTracks] = useState(32);
+  const [nPlaylists, setNPlaylists] = useState(3);
 
-  useEffect(() => {
-    fetch("/api/tracks").then(r=>r.json()).then(d=>setDbTracks(d.tracks||[]));
-    fetch("/api/playlists").then(r=>r.json()).then(d=>setDbPlaylists(d.playlists||[]));
-  }, []);
-
-  const modeBadge = mode === "admin" ? "🎛️ Modo Admin" : mode === "user" ? "🎧 Mi Cuenta" : "🎵 Explorar";
+  useEffect(()=>{
+    fetch("/api/stats").then(r=>r.json()).then(d=>{
+      if(d.stats){ setNTracks(+d.stats.totalTracks||32); setNPlaylists(+d.stats.totalPlaylists||3); }
+    }).catch(()=>{});
+  },[]);
 
   return (
-    <main style={{maxWidth:"1200px",margin:"0 auto",padding:"80px 16px 160px",display:"flex",flexDirection:"column",gap:"48px"}}>
-      <motion.section initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.7,ease:[0.16,1,0.3,1]}}
-        style={{display:"grid",gap:"24px"}}>
-        <div style={{display:"flex",flexDirection:"column",gap:"16px"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:"8px",borderRadius:"999px",border:"1px solid rgba(233,195,73,0.3)",background:"rgba(233,195,73,0.1)",padding:"6px 16px",width:"fit-content"}}>
-            <Sparkles size={14} color="#e9c349" />
-            <span style={{fontSize:"12px",color:"rgba(221,193,174,0.8)",fontFamily:"monospace"}}>{modeBadge}</span>
+    <main style={{background:"#000",minHeight:"100vh",paddingTop:56,paddingBottom:120}}>
+
+      {/* ── Hero full-bleed ──────────────────────────────────────── */}
+      <section style={{position:"relative",height:300,marginBottom:32,overflow:"hidden"}}>
+        <img src="/images/hero.jpg" alt="Decaciones"
+          style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+          onError={e=>{(e.target as HTMLImageElement).style.opacity="0";}}/>
+        {/* Ken-Burns subtle */}
+        <style>{`@keyframes kb{from{transform:scale(1)}to{transform:scale(1.04)}} .hero-img{animation:kb 12s ease-in-out infinite alternate;}`}</style>
+        <div style={{
+          position:"absolute",inset:0,
+          background:"linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.95) 100%)",
+          display:"flex",flexDirection:"column",justifyContent:"flex-end",padding:"0 20px 24px",
+        }}>
+          <p style={{fontSize:11,fontWeight:600,letterSpacing:"0.12em",textTransform:"uppercase",color:C.fg3,marginBottom:6}}>Decaciones</p>
+          <h1 style={{fontSize:30,fontWeight:700,letterSpacing:"-0.025em",lineHeight:1.1,color:C.fg,marginBottom:14}}>
+            La música de tu vida
+          </h1>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <button
+              onClick={()=>playTrack(decades[0].tracks[0], decades.flatMap(d=>d.tracks))}
+              style={{
+                display:"flex",alignItems:"center",gap:8,
+                padding:"9px 20px",borderRadius:24,fontSize:14,fontWeight:600,cursor:"pointer",border:"none",
+                background:"#fff",color:"#000",
+              }}>
+              <span style={{fontSize:12}}>▶</span> Reproducir todo
+            </button>
+            <Link href="/spotify" style={{
+              display:"flex",alignItems:"center",gap:8,
+              padding:"9px 20px",borderRadius:24,fontSize:14,fontWeight:600,textDecoration:"none",
+              background:"rgba(255,255,255,0.12)",color:"#fff",
+              border:"1px solid rgba(255,255,255,0.18)",
+            }}>
+              <span style={{fontSize:12,color:C.green}}>♫</span> Spotify
+            </Link>
           </div>
-          <motion.h1
-            initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.2,duration:0.6}}
-            style={{fontSize:"clamp(32px,6vw,56px)",fontWeight:900,lineHeight:1.1,maxWidth:"700px",
-              background:"linear-gradient(135deg,#e9c349 0%,#ffb77d 50%,#e9c349 100%)",
-              WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>
-            La música de tu vida organizada por décadas.
-          </motion.h1>
-          <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.4}}
-            style={{fontSize:"16px",color:"rgba(221,193,174,0.7)",maxWidth:"560px",lineHeight:1.7}}>
-            Elige una época, un género o una memoria. Decaciones arma la rockola y mantiene el reproductor siempre a mano.
-          </motion.p>
-          <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.5}} style={{display:"flex",gap:"12px",flexWrap:"wrap"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"6px",padding:"6px 14px",borderRadius:"10px",background:"rgba(233,195,73,0.15)",border:"1px solid rgba(233,195,73,0.3)"}}>
-              <Music size={14} color="#e9c349"/>
-              <span style={{fontSize:"13px",color:"#e9c349",fontWeight:600}}>{dbTracks.length||15} canciones</span>
+        </div>
+      </section>
+
+      {/* ── Stats ─────────────────────────────────────────────────── */}
+      <div style={{display:"flex",gap:8,padding:"0 20px",marginBottom:36}}>
+        {[[nTracks,"canciones","#fff"],[nPlaylists,"playlists","#fff"],["5","décadas","#fff"]].map(([v,l])=>(
+          <div key={l as string} style={{
+            flex:1,padding:"12px 0",borderRadius:14,textAlign:"center",
+            background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.07)",
+          }}>
+            <div style={{fontSize:22,fontWeight:800,color:"#fff",lineHeight:1}}>{v}</div>
+            <div style={{fontSize:10,color:C.fg3,marginTop:3,letterSpacing:"0.04em",textTransform:"uppercase"}}>{l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Décadas ───────────────────────────────────────────────── */}
+      <Shelf title="Por Décadas" link="/decades">
+        {decades.map(d=>(
+          <Link key={d.id} href={`/decades?d=${d.id}`} style={{textDecoration:"none",scrollSnapAlign:"start"}}>
+            <ImgCard src={d.image} alt={d.label} width={160} height={100} radius={14}>
+              <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:2,padding:"10px 12px"}}>
+                <div style={{fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.02em"}}>{d.label}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.5)",marginTop:1}}>{d.years}</div>
+              </div>
+            </ImgCard>
+          </Link>
+        ))}
+      </Shelf>
+
+      {/* ── Géneros ───────────────────────────────────────────────── */}
+      <Shelf title="Por Género" link="/genres">
+        {genres.map(g=>(
+          <Link key={g.id} href={`/genres?g=${g.id}`} style={{textDecoration:"none",scrollSnapAlign:"start"}}>
+            <ImgCard src={g.image} alt={g.name} width={150} height={150} radius={16}>
+              <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:2,padding:"12px 14px"}}>
+                <div style={{fontSize:15,fontWeight:700,color:"#fff"}}>{g.name}</div>
+                <div style={{fontSize:10,color:"rgba(255,255,255,0.45)",marginTop:1}}>{g.tracks.length} canciones</div>
+              </div>
+            </ImgCard>
+          </Link>
+        ))}
+      </Shelf>
+
+      {/* ── Playlists destacadas ──────────────────────────────────── */}
+      <Shelf title="Playlists destacadas">
+        {playlists.map(pl=>(
+          <Link key={pl.id} href="/player" style={{textDecoration:"none",scrollSnapAlign:"start",flexShrink:0,width:160}}>
+            <div style={{
+              width:160,
+              transition:"transform 0.22s cubic-bezier(.2,.8,.4,1)",cursor:"pointer",
+            }}
+            onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform="scale(1.04)";}}
+            onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform="scale(1)";}}
+            >
+              <div style={{position:"relative",width:160,height:160,borderRadius:14,overflow:"hidden",background:"#111",marginBottom:10}}>
+                <img src={pl.cover} alt={pl.title}
+                  onError={e=>{(e.target as HTMLImageElement).src="/images/hero.jpg";}}
+                  style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 50%)"}}/>
+              </div>
+              <div style={{fontSize:13,fontWeight:600,color:"#fff",lineHeight:1.3,paddingLeft:2}}>{pl.title}</div>
+              <div style={{fontSize:11,color:C.fg3,marginTop:2,paddingLeft:2}}>{pl.subtitle}</div>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:"6px",padding:"6px 14px",borderRadius:"10px",background:"rgba(70,217,200,0.15)",border:"1px solid rgba(70,217,200,0.3)"}}>
-              <Disc3 size={14} color="#46d9c8"/>
-              <span style={{fontSize:"13px",color:"#46d9c8",fontWeight:600}}>{dbPlaylists.length||3} playlists</span>
-            </div>
-          </motion.div>
-        </div>
-      </motion.section>
+          </Link>
+        ))}
+      </Shelf>
 
-      <motion.section initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.3,duration:0.7}}>
-        <h2 style={{fontSize:"20px",fontWeight:700,color:"#f2e7df",marginBottom:"20px"}}>🕰️ Por Décadas</h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:"12px"}}>
-          {decades.map((d,i)=>(
-            <motion.div key={d.id} initial={{opacity:0,scale:0.9}} animate={{opacity:1,scale:1}} transition={{delay:0.4+i*0.08}}>
-              <DecadeCard decade={d}/>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <motion.section initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.5,duration:0.7}}>
-        <h2 style={{fontSize:"20px",fontWeight:700,color:"#f2e7df",marginBottom:"20px"}}>🎸 Géneros</h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:"12px"}}>
-          {genres.map((g,i)=>(
-            <motion.div key={g.id} initial={{opacity:0,scale:0.9}} animate={{opacity:1,scale:1}} transition={{delay:0.6+i*0.08}}>
-              <GenreCard genre={g}/>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <motion.section initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.7,duration:0.7}}>
-        <h2 style={{fontSize:"20px",fontWeight:700,color:"#f2e7df",marginBottom:"20px"}}>📀 Playlists Destacadas</h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"12px"}}>
-          {(dbPlaylists.length ? dbPlaylists : staticPlaylists).map((pl,i)=>(
-            <motion.div key={pl.id} initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{delay:0.8+i*0.1}}>
-              <PlaylistCard playlist={pl}/>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
     </main>
   );
 }

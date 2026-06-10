@@ -1,189 +1,68 @@
-import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  KeyRound,
-  ListPlus,
-  Search,
-} from "lucide-react";
+import { getCurrentSpotifyUser } from "@/lib/spotify";
 import { SpotifyConnectButton } from "@/components/SpotifyConnectButton";
 import { SpotifyPlaylistCreator } from "@/components/SpotifyPlaylistCreator";
 import { decades, genres, playlists } from "@/data/music";
-import { getCurrentSpotifyUser } from "@/lib/spotify";
-
-export const metadata: Metadata = {
-  title: "Conectar Spotify",
-};
 
 export const dynamic = "force-dynamic";
 
-type SpotifyPageProps = {
-  searchParams?: Promise<{
-    connected?: string;
-    disconnected?: string;
-    error?: string;
-  }>;
-};
-
-type SpotifyConnection = {
-  isConnected: boolean;
-  displayName: string;
-  sessionError?: string;
-};
-
-async function getSpotifyConnection(): Promise<SpotifyConnection> {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("spotify_access_token")?.value;
-
-  if (!accessToken) {
-    return { isConnected: false, displayName: "" };
-  }
-
+async function getConnection() {
+  const store = await cookies();
+  const token = store.get("spotify_access_token")?.value;
+  if (!token) return { isConnected: false, displayName: "" };
   try {
-    const user = await getCurrentSpotifyUser(accessToken);
-    return {
-      isConnected: true,
-      displayName: user.display_name || user.id || "Spotify",
-    };
-  } catch {
-    return {
-      isConnected: false,
-      displayName: "",
-      sessionError: "La sesion de Spotify expiro. Conecta otra vez.",
-    };
-  }
+    const user = await getCurrentSpotifyUser(token);
+    return { isConnected: true, displayName: user.display_name ?? user.id };
+  } catch { return { isConnected: false, displayName: "" }; }
 }
 
-export default async function SpotifyPage({ searchParams }: SpotifyPageProps) {
-  const params = searchParams ? await searchParams : {};
-  const spotify = await getSpotifyConnection();
-  const connectionError = params.error || spotify.sessionError;
-  const playlistSources = [
-    ...decades.map((decade) => ({
-      id: decade.id,
-      title: decade.label,
-      description: decade.description,
-      tracks: decade.tracks.length,
-    })),
-    ...genres.slice(0, 4).map((genre) => ({
-      id: genre.id,
-      title: genre.name,
-      description: genre.description,
-      tracks: genre.tracks.length,
-    })),
-    ...playlists.slice(0, 2).map((playlist) => ({
-      id: playlist.id,
-      title: playlist.title,
-      description: playlist.description,
-      tracks: playlist.tracks.length,
-    })),
+export default async function SpotifyPage({ searchParams }: { searchParams?: Promise<Record<string,string>> }) {
+  const params = await searchParams;
+  const { isConnected, displayName } = await getConnection();
+
+  const sources = [
+    ...decades.map(d=>({ id:d.id, label:`${d.label} (${d.years})`, count:d.tracks.length })),
+    ...genres.map(g=>({ id:g.id, label:g.name, count:g.tracks.length })),
+    ...playlists.map(p=>({ id:p.id, label:p.title, count:p.tracks.length })),
   ];
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pb-44 pt-24 sm:px-6 lg:pb-16">
-      <section className="space-y-4">
-        <p className="font-readout text-sm font-bold uppercase text-gold">
-          Spotify real
-        </p>
-        <h1 className="font-display text-4xl font-black leading-tight gold-text">
-          Conecta Spotify para crear playlists desde tus decadas.
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-muted">
-          La demo sigue reproduciendo audio local, pero Spotify ahora puede
-          autenticar una cuenta real y guardar la sesion server-side.
-        </p>
-        <SpotifyConnectButton isConnected={spotify.isConnected} />
-      </section>
+    <main style={{background:"#000",minHeight:"100vh",paddingTop:72,paddingBottom:120,padding:"72px 20px 120px",maxWidth:540,margin:"0 auto"}}>
+      <h1 style={{fontSize:28,fontWeight:700,color:"#fff",letterSpacing:"-0.025em",marginBottom:6}}>Spotify</h1>
+      <p style={{fontSize:14,color:"rgba(255,255,255,0.4)",marginBottom:32}}>Conecta tu cuenta y exporta playlists directamente.</p>
 
-      {(spotify.isConnected || connectionError || params.disconnected) && (
-        <section className="rounded-2xl p-5 metal-panel">
-          {spotify.isConnected ? (
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-1 h-6 w-6 text-teal" aria-hidden="true" />
-              <div>
-                <h2 className="font-display text-xl font-black text-foreground">
-                  Conexion activa
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Spotify esta conectado
-                  {spotify.displayName ? ` como ${spotify.displayName}` : ""}.
-                  La rockola local permanece disponible aunque Spotify falle.
-                </p>
-              </div>
-            </div>
-          ) : connectionError ? (
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="mt-1 h-6 w-6 text-rose" aria-hidden="true" />
-              <div>
-                <h2 className="font-display text-xl font-black text-foreground">
-                  No se pudo conectar
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  {connectionError}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Confirma que Spotify Developer Dashboard tenga este redirect
-                  URI: https://decaciones.vercel.app/api/auth/callback
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-1 h-6 w-6 text-gold" aria-hidden="true" />
-              <div>
-                <h2 className="font-display text-xl font-black text-foreground">
-                  Sesion cerrada
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-muted">
-                  Spotify fue desconectado. La demo musical local sigue lista.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
+      {params?.connected && (
+        <div style={{padding:"12px 16px",background:"rgba(29,185,84,0.12)",border:"1px solid rgba(29,185,84,0.25)",borderRadius:12,marginBottom:20,fontSize:13,color:"#1DB954"}}>
+          ✓ Conectado como {displayName}
+        </div>
+      )}
+      {params?.error && (
+        <div style={{padding:"12px 16px",background:"rgba(255,59,48,0.1)",border:"1px solid rgba(255,59,48,0.25)",borderRadius:12,marginBottom:20,fontSize:13,color:"#ff3b30"}}>
+          Error: {params.error}
+        </div>
       )}
 
-      <SpotifyPlaylistCreator
-        isConnected={spotify.isConnected}
-        sources={playlistSources}
-      />
+      {/* Connection */}
+      <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,padding:22,marginBottom:20}}>
+        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:18}}>
+          <div style={{width:44,height:44,borderRadius:"50%",background:"#1DB954",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <svg width="22" height="22" viewBox="0 0 168 168"><circle cx="84" cy="84" r="84" fill="#000"/><path d="M119 113.8c-1.6 2.6-5 3.4-7.5 1.8C90.9 103 64.9 100.2 34.3 107.2c-2.9.7-5.9-1.1-6.6-4-.7-2.9 1.1-5.9 4-6.6 33.5-7.7 62.3-4.4 85.5 9.7 2.5 1.6 3.3 5 1.8 7.5zm10-21.2c-2 3.2-6.3 4.2-9.5 2.2C95 80.4 59.1 76.2 31.3 84.6c-3.5 1.1-7.2-1-8.2-4.5-1-3.5 1-7.2 4.5-8.2C59.4 62.3 98.9 66.9 125.8 83c3.2 2 4.2 6.3 2.2 9.6z" fill="#1DB954"/></svg>
+          </div>
+          <div>
+            <div style={{fontSize:17,fontWeight:600,color:"#fff"}}>{isConnected ? `Hola, ${displayName}` : "Conectar Spotify"}</div>
+            <div style={{fontSize:12,color:"rgba(255,255,255,0.38)",marginTop:2}}>{isConnected ? "Cuenta conectada" : "Necesitas autorizar acceso"}</div>
+          </div>
+        </div>
+        <SpotifyConnectButton isConnected={isConnected}/>
+      </div>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        {[
-          {
-            icon: KeyRound,
-            title: "OAuth listo",
-            text: "Authorization Code Flow con callback server-side.",
-          },
-          {
-            icon: Search,
-            title: "Busqueda",
-            text: "Tracks por query para convertir mock data en resultados reales.",
-          },
-          {
-            icon: ListPlus,
-            title: "Playlists",
-            text: "Crear playlist y agregar hasta 100 URIs por llamada.",
-          },
-          {
-            icon: CheckCircle2,
-            title: "Vercel-ready",
-            text: "Variables en entorno, sin secretos dentro del codigo.",
-          },
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <article key={item.title} className="rounded-2xl p-5 metal-panel">
-              <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
-              <h2 className="mt-5 font-display text-xl font-black text-foreground">
-                {item.title}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{item.text}</p>
-            </article>
-          );
-        })}
-      </section>
+      {isConnected && (
+        <div style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:18,padding:22}}>
+          <h2 style={{fontSize:18,fontWeight:600,color:"#fff",marginBottom:4}}>Crear Playlist</h2>
+          <p style={{fontSize:13,color:"rgba(255,255,255,0.38)",marginBottom:18}}>Elige una época o género y lo creamos en tu Spotify.</p>
+          <SpotifyPlaylistCreator sources={sources}/>
+        </div>
+      )}
     </main>
   );
 }

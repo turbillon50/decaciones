@@ -88,7 +88,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const src = getTrackAudioSrc(track);
+    const src = getTrackAudioSrc(track) ?? '';
     if (!audio.src.endsWith(src)) {
       audio.src = src;
     }
@@ -112,8 +112,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio && !audio.src.endsWith(getTrackAudioSrc(currentTrack))) {
-      audio.src = getTrackAudioSrc(currentTrack);
+    const _src = getTrackAudioSrc(currentTrack) ?? '';
+    if (audio && !audio.src.endsWith(_src)) {
+      audio.src = _src;
     }
   }, [currentTrack]);
 
@@ -327,3 +328,5 @@ export function formatTime(totalSeconds: number) {
   const seconds = Math.floor(safeSeconds % 60);
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
+
+export const usePlayerContext = usePlayer;

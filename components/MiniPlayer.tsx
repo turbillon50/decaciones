@@ -1,111 +1,77 @@
 "use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { Heart, Pause, Play, SkipBack, SkipForward } from "lucide-react";
-import { formatTime, usePlayer } from "@/lib/player-store";
-import { cn } from "@/lib/utils";
+import { usePlayer, formatTime } from "@/lib/player-store";
 
 export function MiniPlayer() {
-  const {
-    currentTrack,
-    isPlaying,
-    progress,
-    duration,
-    togglePlay,
-    nextTrack,
-    previousTrack,
-    toggleFavorite,
-    isFavorite,
-  } = usePlayer();
-  const percent = Math.min(
-    100,
-    Math.round((progress / (duration || currentTrack.durationSeconds)) * 100),
-  );
+  const { currentTrack, isPlaying, progress, duration, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite } = usePlayer();
+  const pct = Math.min(100, (progress / (duration || currentTrack.durationSeconds || 1)) * 100);
+  const fav = isFavorite(currentTrack.id);
 
   return (
-    <aside className="fixed inset-x-3 bottom-[5.4rem] z-40 mx-auto max-w-md rounded-2xl border border-line/60 bg-[#181716]/94 p-3 shadow-[0_18px_42px_rgba(0,0,0,0.55)] backdrop-blur-2xl lg:bottom-5 lg:left-auto lg:right-5 lg:mx-0 lg:w-[24rem]">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/player"
-          className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-line/60 bg-black"
-          aria-label="Abrir reproductor"
-        >
-          <Image
-            src={currentTrack.cover}
-            alt={`${currentTrack.title} album art`}
-            fill
-            sizes="56px"
-            className="object-cover"
-          />
+    <div style={{
+      position:"fixed",
+      bottom:"calc(max(12px, env(safe-area-inset-bottom)) + 56px)",
+      left:12,right:12,zIndex:90,
+      maxWidth:480,margin:"0 auto",
+      background:"rgba(22,22,22,0.97)",
+      backdropFilter:"blur(30px) saturate(180%)",
+      WebkitBackdropFilter:"blur(30px) saturate(180%)",
+      borderRadius:18,
+      border:"1px solid rgba(255,255,255,0.09)",
+      boxShadow:"0 20px 50px rgba(0,0,0,0.7)",
+      overflow:"hidden",
+    }}>
+      {/* Progress bar — top edge */}
+      <div style={{height:2,background:"rgba(255,255,255,0.08)"}}>
+        <div style={{height:"100%",background:"rgba(255,255,255,0.6)",width:`${pct}%`,transition:"width 0.5s linear"}}/>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px"}}>
+        {/* Artwork */}
+        <Link href="/player" style={{flexShrink:0,display:"block"}}>
+          <img src={currentTrack.cover} alt="" onError={e=>{(e.target as HTMLImageElement).src="/images/hero.jpg";}}
+            style={{width:44,height:44,borderRadius:9,objectFit:"cover",display:"block"}}/>
         </Link>
-        <div className="min-w-0 flex-1">
-          <Link
-            href="/player"
-            className="block truncate text-sm font-bold text-foreground"
-          >
-            {currentTrack.title}
+        {/* Track info */}
+        <div style={{flex:1,minWidth:0}}>
+          <Link href="/player" style={{textDecoration:"none"}}>
+            <div style={{fontSize:14,fontWeight:600,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{currentTrack.title}</div>
           </Link>
-          <p className="truncate text-xs text-muted">
-            {currentTrack.artist} - {currentTrack.year}
-          </p>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3">
-            <div
-              className="h-full rounded-full bg-primary glow-line"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-          <p className="mt-1 font-readout text-[0.65rem] text-muted">
-            {formatTime(progress)} /{" "}
-            {formatTime(duration || currentTrack.durationSeconds)}
-          </p>
+          <div style={{fontSize:12,color:"rgba(255,255,255,0.42)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{currentTrack.artist}</div>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => toggleFavorite()}
-            className={cn(
-              "grid h-9 w-9 place-items-center rounded-full text-muted transition",
-              isFavorite() && "text-primary",
-            )}
-            aria-label="Marcar favorita"
-          >
-            <Heart
-              className="h-4 w-4"
-              fill={isFavorite() ? "currentColor" : "none"}
-              aria-hidden="true"
-            />
+        {/* Controls */}
+        <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
+          <button onClick={()=>toggleFavorite(currentTrack.id)} style={{
+            background:"none",border:"none",cursor:"pointer",padding:8,
+            color: fav ? "#ff3b30" : "rgba(255,255,255,0.35)",fontSize:18,lineHeight:1,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                fill={fav?"#ff3b30":"none"} stroke={fav?"#ff3b30":"rgba(255,255,255,0.35)"} strokeWidth="1.8"/>
+            </svg>
           </button>
-          <button
-            type="button"
-            onClick={previousTrack}
-            className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:text-primary"
-            aria-label="Anterior"
-          >
-            <SkipBack className="h-4 w-4" aria-hidden="true" />
+          <button onClick={()=>previousTrack()} style={{background:"none",border:"none",cursor:"pointer",padding:8,color:"rgba(255,255,255,0.7)"}}>
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              <polygon points="19 20 9 12 19 4 19 20" fill="currentColor"/>
+              <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
           </button>
-          <button
-            type="button"
-            onClick={togglePlay}
-            className="metal-button grid h-10 w-10 place-items-center rounded-full text-primary"
-            aria-label={isPlaying ? "Pausar" : "Reproducir"}
-          >
-            {isPlaying ? (
-              <Pause className="h-4 w-4" fill="currentColor" aria-hidden="true" />
-            ) : (
-              <Play className="h-4 w-4" fill="currentColor" aria-hidden="true" />
-            )}
+          <button onClick={togglePlay} style={{
+            width:38,height:38,borderRadius:"50%",border:"none",cursor:"pointer",
+            background:"#fff",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",
+          }}>
+            {isPlaying
+              ? <svg width="16" height="16" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="#000"/><rect x="14" y="4" width="4" height="16" fill="#000"/></svg>
+              : <svg width="16" height="16" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="#000"/></svg>
+            }
           </button>
-          <button
-            type="button"
-            onClick={nextTrack}
-            className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:text-primary"
-            aria-label="Siguiente"
-          >
-            <SkipForward className="h-4 w-4" aria-hidden="true" />
+          <button onClick={()=>nextTrack()} style={{background:"none",border:"none",cursor:"pointer",padding:8,color:"rgba(255,255,255,0.7)"}}>
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              <polygon points="5 4 15 12 5 20 5 4" fill="currentColor"/>
+              <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
           </button>
         </div>
       </div>
-    </aside>
+    </div>
   );
 }

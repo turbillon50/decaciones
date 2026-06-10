@@ -1,18 +1,12 @@
-export type DecadeId = "60s" | "70s" | "80s" | "90s" | "2000s";
+export type DecadeId = "80s" | "90s" | "2000s" | "2010s" | "2020s";
 
 export type GenreId =
   | "salsa"
-  | "merengue"
-  | "romanticas"
+  | "bachata"
+  | "cumbia"
+  | "reggaeton"
   | "electronica"
-  | "rock-espanol";
-
-export type AudioCategory =
-  | DecadeId
-  | "salsa"
-  | "merengue"
-  | "romanticas"
-  | "electronica";
+  | "romanticas";
 
 export type Track = {
   id: string;
@@ -31,10 +25,9 @@ export type Track = {
 export type Decade = {
   id: DecadeId;
   label: string;
-  headline: string;
+  years: string;
   description: string;
-  count: string;
-  accent: "gold" | "amber" | "teal" | "rose";
+  image: string;
   tracks: Track[];
 };
 
@@ -42,8 +35,7 @@ export type Genre = {
   id: GenreId;
   name: string;
   description: string;
-  decadeHint: string;
-  accent: "gold" | "amber" | "teal" | "rose";
+  image: string;
   tracks: Track[];
 };
 
@@ -60,6 +52,6 @@ export type AIPrompt = {
   id: string;
   prompt: string;
   response: string;
-  audioCategory: AudioCategory;
+  audioCategory: DecadeId | GenreId;
   tracks: Track[];
 };

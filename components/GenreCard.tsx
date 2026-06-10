@@ -1,65 +1,27 @@
 "use client";
-
-import { Music2, Play } from "lucide-react";
+import Link from "next/link";
 import type { Genre } from "@/lib/types";
-import { withAudioCategory } from "@/lib/audio";
-import { usePlayer } from "@/lib/player-store";
-import { accentClasses, cn } from "@/lib/utils";
 
 export function GenreCard({ genre }: { genre: Genre }) {
-  const { playTrack } = usePlayer();
-  const audioCategory = genre.id === "rock-espanol" ? "90s" : genre.id;
-  const demoQueue = withAudioCategory(genre.tracks, audioCategory);
-  const firstTrack = demoQueue[0];
-  const handlePlay = () => {
-    if (firstTrack) {
-      playTrack(firstTrack, demoQueue);
-    }
-  };
-
   return (
-    <article
-      role="button"
-      tabIndex={0}
-      onClick={handlePlay}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          handlePlay();
-        }
+    <Link href={`/genres?g=${genre.id}`} style={{textDecoration:"none",display:"block"}}>
+      <div style={{
+        position:"relative",width:"100%",paddingTop:"100%",borderRadius:"16px",
+        overflow:"hidden",background:"#111",cursor:"pointer",
+        transition:"transform 0.2s ease",
       }}
-      className="group cursor-pointer rounded-2xl p-5 metal-panel"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div
-          className={cn(
-            "grid h-12 w-12 place-items-center rounded-xl border",
-            accentClasses(genre.accent),
-          )}
-        >
-          <Music2 className="h-5 w-5" aria-hidden="true" />
+      onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform="scale(1.03)";}}
+      onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform="scale(1)";}}
+      >
+        <img src={genre.image} alt={genre.name} onError={(e)=>{(e.target as HTMLImageElement).src="/images/hero.jpg";}}
+          style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}}/>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)"}}>
+          <div style={{position:"absolute",bottom:"12px",left:"14px"}}>
+            <div style={{fontSize:"15px",fontWeight:700,color:"#fff"}}>{genre.name}</div>
+            <div style={{fontSize:"11px",color:"rgba(255,255,255,0.45)",marginTop:"1px"}}>{genre.tracks.length} canciones</div>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            handlePlay();
-          }}
-          className="metal-button grid h-11 w-11 place-items-center rounded-full text-primary"
-          aria-label={`Reproducir ${genre.name}`}
-        >
-          <Play className="h-4 w-4" fill="currentColor" aria-hidden="true" />
-        </button>
       </div>
-      <div className="mt-6 space-y-2">
-        <h3 className="font-display text-2xl font-black text-foreground">
-          {genre.name}
-        </h3>
-        <p className="text-sm leading-6 text-muted">{genre.description}</p>
-        <p className="font-readout text-xs font-bold text-gold">
-          {genre.decadeHint} / {genre.tracks.length} cortes
-        </p>
-      </div>
-    </article>
+    </Link>
   );
 }

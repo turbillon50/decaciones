@@ -1,161 +1,77 @@
 "use client";
-
 import { useState } from "react";
-import { CheckCircle2, ExternalLink, Loader2, ListMusic } from "lucide-react";
 
-type SpotifyPlaylistSource = {
-  id: string;
-  title: string;
-  description: string;
-  tracks: number;
-};
+type Source = { id: string; label: string; count: number };
 
-type SpotifyPlaylistCreatorProps = {
-  isConnected: boolean;
-  sources: SpotifyPlaylistSource[];
-};
-
-type CreatedPlaylist = {
-  name: string;
-  url: string;
-  tracksAdded: number;
-};
-
-export function SpotifyPlaylistCreator({
-  isConnected,
-  sources,
-}: SpotifyPlaylistCreatorProps) {
-  const [selectedId, setSelectedId] = useState(sources[0]?.id ?? "");
-  const [isCreating, setIsCreating] = useState(false);
-  const [createdPlaylist, setCreatedPlaylist] =
-    useState<CreatedPlaylist | null>(null);
+export function SpotifyPlaylistCreator({ sources }: { sources: Source[] }) {
+  const [selected, setSelected] = useState(sources[0]?.id ?? "");
+  const [creating, setCreating] = useState(false);
+  const [created, setCreated] = useState<{name:string;url:string;tracksAdded:number}|null>(null);
   const [error, setError] = useState("");
 
-  async function createSpotifyPlaylist() {
-    if (!selectedId || !isConnected) {
-      return;
-    }
-
-    setIsCreating(true);
-    setCreatedPlaylist(null);
-    setError("");
-
+  async function create() {
+    if (!selected) return;
+    setCreating(true); setError(""); setCreated(null);
     try {
-      const response = await fetch("/api/spotify/playlists", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ sourceId: selectedId }),
+      const res = await fetch("/api/spotify/playlists", {
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ sourceId: selected }),
       });
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "No se pudo crear la playlist.");
-      }
-
-      setCreatedPlaylist(payload.playlist);
-    } catch (playlistError) {
-      setError(
-        playlistError instanceof Error
-          ? playlistError.message
-          : "No se pudo crear la playlist.",
-      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error al crear playlist");
+      setCreated(data.playlist);
+    } catch(e) {
+      setError(e instanceof Error ? e.message : "Error desconocido");
     } finally {
-      setIsCreating(false);
+      setCreating(false);
     }
   }
 
   return (
-    <section className="rounded-2xl p-5 metal-panel">
-      <div className="flex items-start gap-3">
-        <ListMusic className="mt-1 h-6 w-6 text-primary" aria-hidden="true" />
-        <div>
-          <p className="font-readout text-xs font-bold uppercase text-gold">
-            Prueba real de Spotify
-          </p>
-          <h2 className="mt-1 font-display text-2xl font-black text-foreground">
-            Crea una playlist en tu cuenta
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Decaciones busca tracks reales en Spotify y escribe una playlist
-            privada usando tu sesion conectada.
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-5 grid gap-3">
-        {sources.map((source) => (
-          <button
-            key={source.id}
-            type="button"
-            onClick={() => setSelectedId(source.id)}
-            className={`rounded-2xl border p-4 text-left transition ${
-              selectedId === source.id
-                ? "border-primary/60 bg-primary/10"
-                : "border-line/50 bg-black/20 hover:border-primary/30"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-display text-lg font-black text-foreground">
-                {source.title}
-              </h3>
-              <span className="font-readout text-xs text-muted">
-                {source.tracks} tracks
-              </span>
-            </div>
-            <p className="mt-2 text-sm leading-5 text-muted">
-              {source.description}
-            </p>
-          </button>
+    <div style={{display:"flex",flexDirection:"column",gap:"12px"}}>
+      <select value={selected} onChange={e=>setSelected(e.target.value)} style={{
+        width:"100%",padding:"12px 16px",borderRadius:"12px",fontSize:"14px",
+        background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",
+        color:"#fff",outline:"none",cursor:"pointer",
+      }}>
+        {sources.map(s => (
+          <option key={s.id} value={s.id} style={{background:"#111",color:"#fff"}}>
+            {s.label} — {s.count} canciones
+          </option>
         ))}
-      </div>
+      </select>
 
-      <button
-        type="button"
-        onClick={createSpotifyPlaylist}
-        disabled={!isConnected || isCreating}
-        className="metal-button mt-5 inline-flex h-14 w-full items-center justify-center gap-3 rounded-full px-6 text-base font-black text-primary disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto"
-      >
-        {isCreating ? (
-          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-        ) : (
-          <ListMusic className="h-5 w-5" aria-hidden="true" />
-        )}
-        {isConnected ? "Crear playlist real" : "Conecta Spotify primero"}
+      <button onClick={create} disabled={creating || !selected} style={{
+        padding:"12px 24px",borderRadius:"12px",fontSize:"15px",fontWeight:700,
+        background: creating ? "rgba(255,255,255,0.1)" : "#1DB954",
+        color: creating ? "rgba(255,255,255,0.4)" : "#000",
+        border:"none",cursor: creating ? "not-allowed" : "pointer",
+        transition:"all 0.15s",
+      }}>
+        {creating ? "Creando en Spotify…" : "Crear Playlist en Spotify"}
       </button>
 
-      {createdPlaylist && (
-        <div className="mt-5 rounded-2xl border border-teal/30 bg-teal/10 p-4">
-          <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-1 h-5 w-5 text-teal" aria-hidden="true" />
-            <div>
-              <h3 className="font-display text-lg font-black text-foreground">
-                Playlist creada
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-muted">
-                {createdPlaylist.name} tiene {createdPlaylist.tracksAdded}{" "}
-                canciones agregadas.
-              </p>
-              <a
-                href={createdPlaylist.url}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-teal"
-              >
-                Abrir en Spotify
-                <ExternalLink className="h-4 w-4" aria-hidden="true" />
-              </a>
-            </div>
-          </div>
+      {error && (
+        <div style={{padding:"10px 14px",background:"rgba(255,80,80,0.1)",border:"1px solid rgba(255,80,80,0.2)",borderRadius:"10px",fontSize:"13px",color:"#ff6666"}}>
+          {error}
         </div>
       )}
 
-      {error && (
-        <p className="mt-4 rounded-2xl border border-rose/30 bg-rose/10 p-4 text-sm leading-6 text-rose">
-          {error}
-        </p>
+      {created && (
+        <div style={{padding:"14px 16px",background:"rgba(29,185,84,0.1)",border:"1px solid rgba(29,185,84,0.25)",borderRadius:"12px"}}>
+          <div style={{fontSize:"14px",fontWeight:600,color:"#1DB954",marginBottom:"6px"}}>✓ Playlist creada</div>
+          <div style={{fontSize:"13px",color:"rgba(255,255,255,0.6)",marginBottom:"10px"}}>
+            "{created.name}" · {created.tracksAdded} canciones agregadas
+          </div>
+          <a href={created.url} target="_blank" rel="noreferrer" style={{
+            display:"inline-flex",alignItems:"center",gap:"6px",
+            padding:"8px 16px",borderRadius:"8px",textDecoration:"none",
+            background:"#1DB954",color:"#000",fontSize:"13px",fontWeight:600,
+          }}>
+            Abrir en Spotify ↗
+          </a>
+        </div>
       )}
-    </section>
+    </div>
   );
 }

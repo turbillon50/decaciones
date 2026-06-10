@@ -1,28 +1,41 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 export function SplashScreen() {
-  const [show, setShow] = useState(true);
-  useEffect(() => {
-    const seen = sessionStorage.getItem("decaciones:splash");
-    if (seen) { setShow(false); return; }
-    const t = setTimeout(() => { setShow(false); sessionStorage.setItem("decaciones:splash","1"); }, 2200);
-    return () => clearTimeout(t);
-  }, []);
+  const [phase, setPhase] = useState<"show"|"fade"|"gone">("show");
+
+  useEffect(()=>{
+    if(typeof sessionStorage !== "undefined" && sessionStorage.getItem("dec:splash")){
+      setPhase("gone"); return;
+    }
+    const t1 = setTimeout(()=>setPhase("fade"), 1500);
+    const t2 = setTimeout(()=>{ setPhase("gone"); sessionStorage.setItem("dec:splash","1"); }, 2000);
+    return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+  },[]);
+
+  if(phase === "gone") return null;
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div initial={{opacity:1}} exit={{opacity:0,scale:1.05}} transition={{duration:0.5}}
-          style={{position:"fixed",inset:0,zIndex:9999,background:"linear-gradient(135deg,#050505 0%,#0d0a07 50%,#050505 100%)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"24px"}}>
-          <motion.div initial={{scale:0.6,opacity:0}} animate={{scale:1,opacity:1}} transition={{duration:0.6,ease:[0.16,1,0.3,1]}} style={{fontSize:"72px",lineHeight:1}}>🎵</motion.div>
-          <motion.div initial={{y:20,opacity:0}} animate={{y:0,opacity:1}} transition={{delay:0.3,duration:0.5}} style={{textAlign:"center"}}>
-            <div style={{fontSize:"32px",fontWeight:900,letterSpacing:"0.15em",color:"#e9c349"}}>DECACIONES</div>
-            <div style={{fontSize:"13px",color:"rgba(221,193,174,0.6)",marginTop:"6px",letterSpacing:"0.05em"}}>La música de tu vida</div>
-          </motion.div>
-          <motion.div initial={{scaleX:0}} animate={{scaleX:1}} transition={{delay:0.5,duration:1.2}} style={{width:"120px",height:"2px",background:"linear-gradient(90deg,transparent,#e9c349,transparent)",transformOrigin:"left"}}/>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div style={{
+      position:"fixed",inset:0,zIndex:9999,
+      background:"#000",
+      display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:18,
+      opacity: phase === "fade" ? 0 : 1,
+      transition: phase === "fade" ? "opacity 0.45s ease" : "none",
+      pointerEvents:"none",
+    }}>
+      <div style={{
+        width:80,height:80,borderRadius:20,
+        background:"linear-gradient(145deg,#1c1c1c,#2a2a2a)",
+        boxShadow:"0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.8)",
+        display:"flex",alignItems:"center",justifyContent:"center",
+        fontSize:38,
+      }}>🎵</div>
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:22,fontWeight:700,letterSpacing:"-0.02em",color:"#fff"}}>Decaciones</div>
+        <div style={{fontSize:13,color:"rgba(255,255,255,0.28)",marginTop:5,letterSpacing:"0.02em"}}>
+          La música de tu vida
+        </div>
+      </div>
+    </div>
   );
 }
