@@ -9,7 +9,7 @@ import Icon from "@/components/Icon";
 export default function SettingsPage() {
   const router = useRouter();
   const { mode, setMode, textSize, setTextSize } = useTheme();
-  const { sleepMinutes, startSleep, cancelSleep } = usePlayer();
+  const { sleepMinutes, startSleep, cancelSleep, spotifyActive } = usePlayer();
   const { notify } = useToast();
   const sizes: { id: "normal" | "grande" | "enorme"; label: string }[] = [
     { id: "normal", label: "Normal" }, { id: "grande", label: "Grande" }, { id: "enorme", label: "Enorme" },
@@ -50,6 +50,15 @@ export default function SettingsPage() {
             ))}
             {sleepMinutes && <button onClick={() => { cancelSleep(); notify("Temporizador cancelado"); }} style={{ ...seg(false), flex: "0 0 auto" }}>Apagar</button>}
           </div>
+        </Row>
+        <Row>
+          <Label icon="play" text="Spotify" />
+          <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginBottom: 12, lineHeight: 1.4 }}>
+            {spotifyActive ? "Audio completo activado (cuenta Premium conectada)." : "Conecta tu cuenta Spotify Premium para escuchar canciones completas. Sin conexion suenan previews de 30s."}
+          </div>
+          <button onClick={() => { window.location.href = "/api/auth/spotify"; }} style={{ ...seg(true), width: "100%" }}>
+            {spotifyActive ? "Reconectar Spotify" : "Iniciar sesion con Spotify"}
+          </button>
         </Row>
         <button onClick={() => router.push("/bluetooth")} className="glass" style={{ width: "100%", borderRadius: 20, padding: 20, display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
           <span style={{ color: "var(--gold)" }}><Icon name="bluetooth" size={26} /></span>

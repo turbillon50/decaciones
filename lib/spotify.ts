@@ -100,7 +100,7 @@ export function getSpotifyAuthUrl(
     scope: scopes.join(" "),
     redirect_uri: redirectUriOverride ?? redirectUri,
     state,
-    show_dialog: "false",
+    show_dialog: "true",
   });
 
   return `${authBaseUrl}?${params.toString()}`;

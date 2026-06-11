@@ -17,7 +17,7 @@ type PlayerContextValue = {
   progress: number; duration: number; volume: number;
   shuffleEnabled: boolean; repeatEnabled: boolean;
   favorites: Set<string>; sleepMinutes: number | null; sleepEndsAt: number | null;
-  playerStatus: PlayerStatus; statusMessage: string | null; isSpotifyReady: boolean;
+  playerStatus: PlayerStatus; statusMessage: string | null; isSpotifyReady: boolean; spotifyActive: boolean;
   playTrack: (track: Track, queue?: Track[]) => void;
   togglePlay: () => void; nextTrack: () => void; previousTrack: () => void;
   toggleFavorite: (trackId?: string) => void; isFavorite: (trackId?: string) => boolean;
@@ -123,6 +123,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [sleepEndsAt, setSleepEndsAt] = useState<number | null>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>("connecting");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [spotifyActive, setSpotifyActive] = useState(false);
 
   const queueRef = useRef(queue);
   const currentTrackRef = useRef(currentTrack);
@@ -286,7 +287,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         const fail = (msg: string) => { if (settled) return; settled = true; window.clearTimeout(tid); player.disconnect(); reject(new Error(msg)); };
         player.addListener("ready", ({ device_id }) => {
           deviceIdRef.current = device_id; playerRef.current = player;
-          setConnectionState("ready", null); void player.setVolume(volumeRef.current).catch(() => {});
+          setConnectionState("ready", null); setSpotifyActive(true); void player.setVolume(volumeRef.current).catch(() => {});
           if (!settled) { settled = true; window.clearTimeout(tid); resolve(device_id); }
         });
         player.addListener("not_ready", ({ device_id }) => { if (deviceIdRef.current === device_id) deviceIdRef.current = null; setConnectionState("error", "Spotify desconectado"); });
@@ -330,8 +331,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setConnectionState("ready", null); setIsPlaying(true);
       progressSnapshotRef.current = { position: safeStart, duration: track.durationSeconds, paused: false, updatedAt: Date.now() };
       if (safeStart > 0) await playerRef.current?.seek(Math.round(safeStart * 1000)).catch(() => {});
-    } catch (e) { reportPlaybackError(e); }
-  }, [ensurePlayer, getHouseToken, persistResume, playOnDevice, reportPlaybackError, resolveTrackUri, setActiveTrack, setConnectionState]);
+    } catch {
+      // Nunca quedar mudo: si Spotify falla (no Premium / track no disponible), cae a preview de 30s.
+      isMobileRef.current = true; setSpotifyActive(false);
+      setConnectionState("ready", null);
+      playLocalAudio(track);
+    }
+  }, [ensurePlayer, getHouseToken, persistResume, playOnDevice, reportPlaybackError, resolveTrackUri, setActiveTrack, setConnectionState, playLocalAudio]);
 
   // ── UNIFIED API ───────────────────────────────────────────────────────────
   const playTrack = useCallback((track: Track, nextQueue?: Track[]) => {
@@ -443,15 +449,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // ── MOBILE vs DESKTOP init ─────────────────────────────────────────────────
   useEffect(() => {
-    // FORZAR modo preview (iTunes 30s) en todos los dispositivos: suena sin Spotify Premium.
-    isMobileRef.current = true;
+    isMobileRef.current = isMobileDevice();
     if (isMobileRef.current) {
       // Mobile: listo de inmediato con audio local
       setConnectionState("ready", null);
     } else {
-      // Desktop: conectar Spotify
-      void ensurePlayer().catch((e: unknown) => {
-        reportPlaybackError(e, "No se pudo conectar Spotify");
+      // Desktop: intenta Spotify (audio completo, requiere Premium). Si falla, cae a previews iTunes (nunca mudo).
+      void ensurePlayer().then(() => { setSpotifyActive(true); }).catch(() => {
+        isMobileRef.current = true;
+        setSpotifyActive(false);
+        setConnectionState("ready", null);
       });
     }
     return () => {
@@ -483,11 +490,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     currentTrack, queue, isPlaying, progress, duration, volume,
     shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt,
-    playerStatus, statusMessage, isSpotifyReady: playerStatus === "ready",
+    playerStatus, statusMessage, isSpotifyReady: playerStatus === "ready", spotifyActive,
     playTrack, togglePlay, nextTrack, previousTrack,
     toggleFavorite, isFavorite, setProgress, setVolume,
     toggleShuffle, toggleRepeat, startSleep, cancelSleep,
-  }), [currentTrack, queue, isPlaying, progress, duration, volume, shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt, playerStatus, statusMessage, playTrack, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite, setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep]);
+  }), [currentTrack, queue, isPlaying, progress, duration, volume, shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt, playerStatus, statusMessage, spotifyActive, playTrack, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite, setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
