@@ -443,7 +443,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // ── MOBILE vs DESKTOP init ─────────────────────────────────────────────────
   useEffect(() => {
-    isMobileRef.current = isMobileDevice();
+    // FORZAR modo preview (iTunes 30s) en todos los dispositivos: suena sin Spotify Premium.
+    isMobileRef.current = true;
     if (isMobileRef.current) {
       // Mobile: listo de inmediato con audio local
       setConnectionState("ready", null);
