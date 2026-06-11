@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import Cover from "@/components/Cover";
 import type { Track } from "@/lib/types";
 
 export default function CoverFlow({ tracks, onSelect, size = 240 }:
@@ -41,7 +42,7 @@ export default function CoverFlow({ tracks, onSelect, size = 240 }:
         <div key={t.id} className="coverflow-item" style={{ width: size, marginRight: -size * 0.22 }}>
           <button onClick={() => onSelect(t, tracks)} style={{ display: "block", width: size }}>
             <div style={{ width: size, height: size, borderRadius: 20, overflow: "hidden", boxShadow: "var(--shadow)" }}>
-              <img src={t.cover} alt={t.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <Cover track={t} alt={t.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ marginTop: 12, textAlign: "center", maxWidth: size }}>
               <div style={{ fontWeight: 700, fontSize: "calc(1.05rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>

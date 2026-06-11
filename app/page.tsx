@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/lib/player-store";
@@ -8,6 +8,7 @@ import { useToast } from "@/lib/toast";
 import { tracks, decades, playlists } from "@/data/music";
 import CoverFlow from "@/components/CoverFlow";
 import BigCard from "@/components/BigCard";
+import Cover from "@/components/Cover";
 import Icon from "@/components/Icon";
 
 export default function Home() {
@@ -23,8 +24,13 @@ export default function Home() {
   }, [favorites]);
 
   const queue = useMemo(() => tracks.slice(0, 14), []);
-  const hour = new Date().getHours();
-  const saludo = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
+  // Saludo dependiente de la hora: se calcula tras el montaje para evitar
+  // mismatch de hidratación servidor/cliente (React #418).
+  const [saludo, setSaludo] = useState("Bienvenido");
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setSaludo(hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches");
+  }, []);
 
   return (
     <div style={{ padding: "calc(env(safe-area-inset-top) + 18px) 0 0" }}>
@@ -44,7 +50,7 @@ export default function Home() {
       <section className="float-in" style={{ padding: "10px 22px 0" }}>
         <motion.div whileTap={{ scale: 0.99 }} onClick={() => router.push("/player")}
           style={{ position: "relative", borderRadius: 30, overflow: "hidden", boxShadow: "var(--shadow)", cursor: "pointer" }}>
-          <img src={currentTrack.cover} alt="" style={{ width: "100%", aspectRatio: "1 / 1", maxHeight: "60vh", objectFit: "cover", display: "block" }} />
+          <Cover track={currentTrack} style={{ width: "100%", aspectRatio: "1 / 1", maxHeight: "60vh", objectFit: "cover", display: "block" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.82) 100%)" }} />
           <div style={{ position: "absolute", left: 22, right: 22, bottom: 22 }}>
             <div style={{ color: "var(--gold-2)", fontWeight: 700, fontSize: "calc(0.95rem * var(--fz))", letterSpacing: 1 }}>SONANDO AHORA</div>
@@ -67,7 +73,7 @@ export default function Home() {
             <button key={t.id} onClick={() => { playTrack(t, preloaded); notify("Reproduciendo " + t.title, "▶"); }}
               style={{ flex: "0 0 auto", width: 130, textAlign: "center" }}>
               <div style={{ width: 130, height: 130, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow)", border: "3px solid var(--surface-2)" }}>
-                <img src={t.cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <Cover track={t} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <div style={{ marginTop: 10, fontWeight: 700, fontSize: "calc(0.95rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</div>
             </button>

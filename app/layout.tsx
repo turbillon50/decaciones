@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   applicationName: "Decaciones",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Decaciones" },
-  icons: { icon: "/icons/decaciones-icon.svg", apple: "/icons/decaciones-icon.svg" },
+  icons: { icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }], apple: "/apple-touch-icon.png" },
 };
 export const viewport: Viewport = {
   themeColor: "#0a0a0c",

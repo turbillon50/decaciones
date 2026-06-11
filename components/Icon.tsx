@@ -5,9 +5,10 @@ type Name =
   | "play" | "pause" | "prev" | "next" | "heart" | "heartFilled"
   | "home" | "disc" | "calendar" | "radio" | "bluetooth" | "settings"
   | "sun" | "moon" | "shuffle" | "repeat" | "timer" | "close"
-  | "chevronDown" | "chevronRight" | "plus" | "volume" | "speaker" | "check" | "list" | "mic";
+  | "chevronDown" | "chevronRight" | "plus" | "volume" | "speaker" | "check" | "list" | "mic" | "search";
 
 const paths: Record<Name, React.ReactNode> = {
+  search: <><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M15.5 15.5 21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></>,
   play: <path d="M8 5.5v13a1 1 0 0 0 1.52.85l11-6.5a1 1 0 0 0 0-1.7l-11-6.5A1 1 0 0 0 8 5.5Z" />,
   pause: <><rect x="6.5" y="5" width="4" height="14" rx="1.3" /><rect x="13.5" y="5" width="4" height="14" rx="1.3" /></>,
   prev: <><path d="M18 5.5v13a1 1 0 0 1-1.52.85l-9-5.3 9-5.3A1 1 0 0 1 18 5.5Z" /><rect x="5" y="5" width="2.6" height="14" rx="1.1" /></>,

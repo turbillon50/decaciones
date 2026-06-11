@@ -1,15 +1,26 @@
 "use client";
 import { usePlayer } from "@/lib/player-store";
+import Cover from "@/components/Cover";
 import Icon from "@/components/Icon";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function NowPlayingBar() {
-  const { currentTrack, isPlaying, togglePlay, nextTrack, progress, duration } = usePlayer();
+  const {
+    currentTrack,
+    isPlaying,
+    togglePlay,
+    nextTrack,
+    progress,
+    duration,
+    playerStatus,
+    statusMessage,
+  } = usePlayer();
   const router = useRouter();
   const pathname = usePathname();
   if (pathname === "/player") return null;
   const pct = duration ? Math.min(100, (progress / duration) * 100) : 0;
+  const needsAttention = playerStatus === "disconnected" || playerStatus === "error";
 
   return (
     <AnimatePresence>
@@ -19,10 +30,10 @@ export default function NowPlayingBar() {
           bottom: "calc(78px + env(safe-area-inset-bottom) + 12px)", zIndex: 70 }}>
         <div className="glass" style={{ borderRadius: 22, boxShadow: "var(--shadow)", overflow: "hidden" }}>
           <div onClick={() => router.push("/player")} style={{ display: "flex", alignItems: "center", gap: 14, padding: 12, cursor: "pointer" }}>
-            <img src={currentTrack.cover} alt="" style={{ width: 58, height: 58, borderRadius: 14, objectFit: "cover", flex: "0 0 auto" }} />
+            <Cover track={currentTrack} style={{ width: 58, height: 58, borderRadius: 14, objectFit: "cover", flex: "0 0 auto" }} />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: "calc(1.05rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentTrack.title}</div>
-              <div style={{ color: "var(--text-soft)", fontSize: "calc(0.9rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentTrack.artist}</div>
+              <div style={{ color: needsAttention ? "var(--gold)" : "var(--text-soft)", fontWeight: needsAttention ? 700 : 500, fontSize: "calc(0.9rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{statusMessage ?? currentTrack.artist}</div>
             </div>
             <button className="tap" onClick={(e) => { e.stopPropagation(); togglePlay(); }}
               style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--gold)", color: "#1a1206", flex: "0 0 auto" }}>

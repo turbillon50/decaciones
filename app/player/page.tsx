@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePlayer, formatTime } from "@/lib/player-store";
+import { useArtwork } from "@/lib/artwork";
 import { useToast } from "@/lib/toast";
 import { getLyrics } from "@/data/lyrics";
 import Icon from "@/components/Icon";
@@ -19,13 +20,14 @@ export default function PlayerPage() {
     currentTrack, isPlaying, togglePlay, nextTrack, previousTrack,
     progress, duration, setProgress, shuffleEnabled, repeatEnabled,
     toggleShuffle, toggleRepeat, toggleFavorite, isFavorite,
-    sleepMinutes, startSleep, cancelSleep,
+    sleepMinutes, startSleep, cancelSleep, playerStatus, statusMessage,
   } = usePlayer();
 
   const [view, setView] = useState<View>("disco");
   const [sleepOpen, setSleepOpen] = useState(false);
   const lyrics = useMemo(() => getLyrics(currentTrack.id), [currentTrack.id]);
   const fav = isFavorite(currentTrack.id);
+  const cover = useArtwork(currentTrack);
   const size = 320;
 
   const activeLine = useMemo(() => {
@@ -71,12 +73,12 @@ export default function PlayerPage() {
         <AnimatePresence mode="wait">
           {view === "disco" && (
             <motion.div key="disco" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-              <Vinyl cover={currentTrack.cover} size={size} spinning={isPlaying} />
+              <Vinyl cover={cover} size={size} spinning={isPlaying} />
             </motion.div>
           )}
           {view === "portada" && (
             <motion.div key="portada" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-              <PinchImage src={currentTrack.cover} size={size} />
+              <PinchImage src={cover} size={size} />
             </motion.div>
           )}
           {view === "letra" && (
@@ -101,6 +103,13 @@ export default function PlayerPage() {
         <div style={{ fontWeight: 900, fontSize: "calc(2rem * var(--fz))", lineHeight: 1.08 }}>{currentTrack.title}</div>
         <div style={{ color: "var(--text-soft)", fontSize: "calc(1.2rem * var(--fz))", marginTop: 4 }}>{currentTrack.artist}</div>
         <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginTop: 2 }}>{currentTrack.album} · {currentTrack.year}</div>
+        {statusMessage && (
+          <div role="status" style={{ maxWidth: 420, margin: "12px auto 0", padding: "10px 14px", borderRadius: 14,
+            background: "var(--surface-2)", color: playerStatus === "disconnected" || playerStatus === "error" ? "var(--gold)" : "var(--text-soft)",
+            fontWeight: 800, fontSize: "calc(0.94rem * var(--fz))", lineHeight: 1.25 }}>
+            {statusMessage}
+          </div>
+        )}
       </div>
 
       {/* progreso */}

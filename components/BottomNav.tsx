@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 const items = [
   { href: "/", label: "Inicio", icon: "home" as const },
+  { href: "/buscar", label: "Buscar", icon: "search" as const },
   { href: "/decades", label: "Épocas", icon: "calendar" as const },
   { href: "/genres", label: "Géneros", icon: "disc" as const },
   { href: "/favorites", label: "Favoritos", icon: "heart" as const },
