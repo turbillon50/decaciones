@@ -9,8 +9,11 @@ import { setArtwork } from "@/lib/artwork";
 import { loadSpotifySDK } from "@/lib/spotify-sdk";
 import type { SpotifyPlaybackState, SpotifyPlayer } from "@/lib/spotify-sdk";
 import type { Track } from "@/lib/types";
+import { useToast } from "@/lib/toast";
 
 type PlayerStatus = "connecting" | "ready" | "disconnected" | "error";
+type PlaybackMode = "preview" | "connect";
+export type ConnectDevice = { id: string | null; name: string; type: string; is_active: boolean };
 
 type PlayerContextValue = {
   currentTrack: Track; queue: Track[]; isPlaying: boolean;
@@ -18,12 +21,16 @@ type PlayerContextValue = {
   shuffleEnabled: boolean; repeatEnabled: boolean;
   favorites: Set<string>; sleepMinutes: number | null; sleepEndsAt: number | null;
   playerStatus: PlayerStatus; statusMessage: string | null; isSpotifyReady: boolean; spotifyActive: boolean;
+  connectMode: boolean; connectAvailable: boolean; connectDevices: ConnectDevice[];
   playTrack: (track: Track, queue?: Track[]) => void;
   togglePlay: () => void; nextTrack: () => void; previousTrack: () => void;
   toggleFavorite: (trackId?: string) => void; isFavorite: (trackId?: string) => boolean;
   setProgress: (value: number) => void; setVolume: (value: number) => void;
   toggleShuffle: () => void; toggleRepeat: () => void;
   startSleep: (minutes: number) => void; cancelSleep: () => void;
+  setPlaybackMode: (mode: PlaybackMode) => void;
+  refreshDevices: () => Promise<ConnectDevice[]>;
+  useConnectDevice: (deviceId: string | null) => void;
 };
 
 type TokenResponse = { access_token?: string; expires_in?: number };
@@ -34,6 +41,7 @@ type ProgressSnapshot = { position: number; duration: number; paused: boolean; u
 const PlayerContext = createContext<PlayerContextValue | null>(null);
 const favoritesKey = "decaciones:favorites";
 const resumeKey = "decaciones:resume";
+const playbackModeKey = "decaciones:playback-mode";
 const playerName = "Decaciones Web Player";
 
 // ── Mobile detection ──────────────────────────────────────────────────────────
@@ -109,6 +117,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // Mobile audio ref
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isMobileRef = useRef(false);
+  // Spotify Connect (movil hibrido)
+  const { notify } = useToast();
+  const connectModeRef = useRef(false);
+  const connectDeviceRef = useRef<string | null>(null);
+  const connectPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const connectEndingRef = useRef(false);
+  const advanceConnectRef = useRef<() => void>(() => {});
 
   const [queue, setQueueState] = useState<Track[]>(defaultQueue);
   const [currentTrack, setCurrentTrackState] = useState<Track>(initialTrack);
@@ -124,6 +139,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>("connecting");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [spotifyActive, setSpotifyActive] = useState(false);
+  const [connectMode, setConnectMode] = useState(false);
+  const [connectAvailable, setConnectAvailable] = useState(false);
+  const [connectDevices, setConnectDevices] = useState<ConnectDevice[]>([]);
 
   const queueRef = useRef(queue);
   const currentTrackRef = useRef(currentTrack);
@@ -339,28 +357,128 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [ensurePlayer, getHouseToken, persistResume, playOnDevice, reportPlaybackError, resolveTrackUri, setActiveTrack, setConnectionState, playLocalAudio]);
 
+  // ── MOBILE: Spotify Connect (control remoto de la app nativa) ──────────────
+  const stopConnectPolling = useCallback(() => {
+    if (connectPollRef.current) { clearInterval(connectPollRef.current); connectPollRef.current = null; }
+  }, []);
+
+  const fetchDevices = useCallback(async (): Promise<ConnectDevice[]> => {
+    try {
+      const r = await fetch("/api/spotify/devices", { cache: "no-store" });
+      if (!r.ok) { if (mountedRef.current) { setConnectDevices([]); setConnectAvailable(false); } return []; }
+      const d = (await r.json()) as { devices?: ConnectDevice[] };
+      const devices = d.devices ?? [];
+      if (mountedRef.current) { setConnectDevices(devices); setConnectAvailable(devices.length > 0); }
+      return devices;
+    } catch { return []; }
+  }, []);
+
+  const pollConnectState = useCallback(async () => {
+    try {
+      const r = await fetch("/api/spotify/state", { cache: "no-store" });
+      if (!r.ok || !mountedRef.current) return;
+      const d = (await r.json()) as { playing: boolean; position: number; duration: number; uri: string | null; hasDevice: boolean };
+      if (d.duration > 0) { durationRef.current = d.duration; setDurationState(d.duration); }
+      setProgressState(d.position);
+      setIsPlaying(d.playing); isPlayingRef.current = d.playing;
+      persistResume(currentTrackRef.current, d.position);
+      // Fin de pista: avanzar a la siguiente (las pistas se mandan de una en una).
+      if (d.duration > 0 && d.position >= d.duration - 2) {
+        if (!connectEndingRef.current) { connectEndingRef.current = true; advanceConnectRef.current(); }
+      }
+    } catch {}
+  }, [persistResume]);
+
+  const startConnectPolling = useCallback(() => {
+    stopConnectPolling();
+    connectPollRef.current = setInterval(() => { void pollConnectState(); }, 2000);
+  }, [stopConnectPolling, pollConnectState]);
+
+  const fallbackToPreview = useCallback((silent = false) => {
+    connectModeRef.current = false;
+    stopConnectPolling();
+    if (mountedRef.current) setConnectMode(false);
+    try { localStorage.setItem(playbackModeKey, "preview"); } catch {}
+    if (!silent) notify("Abre Spotify para canciones completas", "🎧");
+  }, [stopConnectPolling, notify]);
+
+  // Acciones remotas (pause/resume/seek/volume). Devuelve false si cayo a preview.
+  const connectAction = useCallback(async (payload: Record<string, unknown>): Promise<boolean> => {
+    try {
+      const r = await fetch("/api/spotify/connect-play", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId: connectDeviceRef.current, ...payload }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { error?: string };
+      if (!r.ok || d?.error === "no_device") { fallbackToPreview(); return false; }
+      return true;
+    } catch { return false; }
+  }, [fallbackToPreview]);
+
+  const playConnectTrack = useCallback(async (track: Track) => {
+    setActiveTrack(track);
+    setProgressState(0);
+    connectEndingRef.current = false;
+    try {
+      const uri = await resolveTrackUri(track);
+      const r = await fetch("/api/spotify/connect-play", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uri, deviceId: connectDeviceRef.current, action: "play" }),
+      });
+      const d = (await r.json().catch(() => ({}))) as { error?: string };
+      if (!r.ok || d?.error) {
+        // El telefono cerro Spotify (o el track no se pudo lanzar): cae a preview, nunca mudo.
+        fallbackToPreview(); playLocalAudio(track); return;
+      }
+      setIsPlaying(true); isPlayingRef.current = true;
+      setConnectionState("ready", null);
+      persistResume(track, 0);
+      startConnectPolling();
+    } catch {
+      fallbackToPreview(); playLocalAudio(track);
+    }
+  }, [resolveTrackUri, setActiveTrack, persistResume, setConnectionState, fallbackToPreview, playLocalAudio, startConnectPolling]);
+
+  // advanceConnectRef rompe el ciclo poll -> avanzar -> playConnectTrack -> poll.
+  useEffect(() => {
+    advanceConnectRef.current = () => {
+      const cur = currentTrackRef.current;
+      const next = repeatRef.current ? cur : pickNextTrack(queueRef.current, cur, shuffleRef.current);
+      void playConnectTrack(next);
+    };
+  }, [playConnectTrack]);
+
   // ── UNIFIED API ───────────────────────────────────────────────────────────
   const playTrack = useCallback((track: Track, nextQueue?: Track[]) => {
     const q = nextQueue && nextQueue.some(t => t.id === track.id) ? nextQueue : [track];
     setQueue(q);
-    if (isMobileRef.current) playLocalAudio(track);
+    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(track); else playLocalAudio(track); }
     else void playSpotifyTrack(track);
-  }, [playLocalAudio, playSpotifyTrack, setQueue]);
+  }, [playLocalAudio, playConnectTrack, playSpotifyTrack, setQueue]);
 
   const nextTrack = useCallback(() => {
     const next = pickNextTrack(queueRef.current, currentTrackRef.current, shuffleRef.current);
-    if (isMobileRef.current) playLocalAudio(next);
+    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(next); else playLocalAudio(next); }
     else void playSpotifyTrack(next);
-  }, [playLocalAudio, playSpotifyTrack]);
+  }, [playLocalAudio, playConnectTrack, playSpotifyTrack]);
 
   const previousTrack = useCallback(() => {
     const prev = pickPreviousTrack(queueRef.current, currentTrackRef.current);
-    if (isMobileRef.current) playLocalAudio(prev);
+    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(prev); else playLocalAudio(prev); }
     else void playSpotifyTrack(prev);
-  }, [playLocalAudio, playSpotifyTrack]);
+  }, [playLocalAudio, playConnectTrack, playSpotifyTrack]);
 
   const togglePlay = useCallback(() => {
     if (isMobileRef.current) {
+      if (connectModeRef.current) {
+        const wasPlaying = isPlayingRef.current;
+        void connectAction({ action: wasPlaying ? "pause" : "resume" }).then(ok => {
+          if (!ok) { playLocalAudio(currentTrackRef.current); return; }
+          setIsPlaying(!wasPlaying); isPlayingRef.current = !wasPlaying;
+          if (wasPlaying) stopConnectPolling(); else startConnectPolling();
+        });
+        return;
+      }
       const audio = audioRef.current;
       if (!audio) { playLocalAudio(currentTrackRef.current, progress); return; }
       if (audio.paused) { void audio.play().then(() => { setIsPlaying(true); isPlayingRef.current = true; }).catch(() => {}); }
@@ -376,7 +494,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         await player.togglePlay();
       } catch (e) { reportPlaybackError(e, "Error play/pausa"); }
     })();
-  }, [playLocalAudio, playSpotifyTrack, progress, reportPlaybackError]);
+  }, [playLocalAudio, playSpotifyTrack, progress, reportPlaybackError, connectAction, startConnectPolling, stopConnectPolling]);
 
   const toggleFavorite = useCallback((id = currentTrackRef.current.id) => {
     setFavorites(cur => { const n = new Set(cur); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -389,19 +507,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const next = clamp(value, 0, max);
     setProgressState(next); persistResume(currentTrackRef.current, next);
     if (isMobileRef.current) {
-      if (audioRef.current) audioRef.current.currentTime = next;
+      if (connectModeRef.current) void connectAction({ action: "seek", position: Math.round(next * 1000) });
+      else if (audioRef.current) audioRef.current.currentTime = next;
     } else {
       progressSnapshotRef.current = { position: next, duration: max, paused: !isPlaying, updatedAt: Date.now() };
       void playerRef.current?.seek(Math.round(next * 1000)).catch((e: unknown) => { reportPlaybackError(e, "Error al adelantar"); });
     }
-  }, [isPlaying, persistResume, reportPlaybackError]);
+  }, [isPlaying, persistResume, reportPlaybackError, connectAction]);
 
   const setVolume = useCallback((value: number) => {
     const v = clamp(value, 0, 1);
     volumeRef.current = v; setVolumeState(v);
-    if (isMobileRef.current) { if (audioRef.current) audioRef.current.volume = v; }
-    else void playerRef.current?.setVolume(v).catch((e: unknown) => { reportPlaybackError(e, "Error de volumen"); });
-  }, [reportPlaybackError]);
+    if (isMobileRef.current) {
+      if (connectModeRef.current) void connectAction({ action: "volume", volume: Math.round(v * 100) });
+      else if (audioRef.current) audioRef.current.volume = v;
+    } else void playerRef.current?.setVolume(v).catch((e: unknown) => { reportPlaybackError(e, "Error de volumen"); });
+  }, [reportPlaybackError, connectAction]);
 
   const toggleShuffle = useCallback(() => { setShuffleEnabled(c => { const n = !c; shuffleRef.current = n; return n; }); }, []);
   const toggleRepeat = useCallback(() => { setRepeatEnabled(c => { const n = !c; repeatRef.current = n; return n; }); }, []);
@@ -410,11 +531,40 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (sleepRef.current) clearTimeout(sleepRef.current);
     setSleepMinutes(minutes); setSleepEndsAt(Date.now() + minutes * 60_000);
     sleepRef.current = setTimeout(() => {
-      if (isMobileRef.current) { if (audioRef.current) audioRef.current.pause(); }
-      else void playerRef.current?.pause().catch(() => {});
+      if (isMobileRef.current) {
+        if (connectModeRef.current) { void connectAction({ action: "pause" }); stopConnectPolling(); }
+        else if (audioRef.current) audioRef.current.pause();
+      } else void playerRef.current?.pause().catch(() => {});
       setIsPlaying(false); setSleepMinutes(null); setSleepEndsAt(null);
     }, minutes * 60_000);
-  }, []);
+  }, [connectAction, stopConnectPolling]);
+
+  // ── SETTINGS: control de modo Connect/preview ──────────────────────────────
+  const refreshDevices = useCallback(() => fetchDevices(), [fetchDevices]);
+
+  const useConnectDevice = useCallback((deviceId: string | null) => {
+    connectDeviceRef.current = deviceId;
+    connectModeRef.current = true; setConnectMode(true);
+    try { localStorage.setItem(playbackModeKey, "connect"); } catch {}
+    notify("Spotify Connect activado", "🎵");
+  }, [notify]);
+
+  const setPlaybackMode = useCallback((mode: PlaybackMode) => {
+    try { localStorage.setItem(playbackModeKey, mode); } catch {}
+    if (mode === "preview") {
+      if (isPlayingRef.current && connectModeRef.current) void connectAction({ action: "pause" });
+      connectModeRef.current = false; setConnectMode(false); stopConnectPolling();
+    } else {
+      void (async () => {
+        const devices = await fetchDevices();
+        if (devices.length === 0) { notify("Abre Spotify en tu telefono primero", "🎧"); return; }
+        const active = devices.find(d => d.is_active) ?? devices[0];
+        connectDeviceRef.current = active.id;
+        connectModeRef.current = true; setConnectMode(true);
+        notify("Spotify Connect activado", "🎵");
+      })();
+    }
+  }, [connectAction, stopConnectPolling, fetchDevices, notify]);
 
   // ── INIT ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -451,8 +601,22 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     isMobileRef.current = isMobileDevice();
     if (isMobileRef.current) {
-      // Mobile: listo de inmediato con audio local
+      // Mobile: listo de inmediato con audio local (previews). Si hay un Spotify
+      // abierto en el telefono y el usuario no eligio "preview", pasa a Connect (completas).
       setConnectionState("ready", null);
+      void (async () => {
+        let saved: string | null = null;
+        try { saved = localStorage.getItem(playbackModeKey); } catch {}
+        if (saved === "preview") return;
+        const devices = await fetchDevices();
+        if (devices.length > 0) {
+          const active = devices.find(d => d.is_active) ?? devices[0];
+          connectDeviceRef.current = active.id;
+          connectModeRef.current = true;
+          if (mountedRef.current) setConnectMode(true);
+          try { localStorage.setItem(playbackModeKey, "connect"); } catch {}
+        }
+      })();
     } else {
       // Desktop: intenta Spotify (audio completo, requiere Premium). Si falla, cae a previews iTunes (nunca mudo).
       void ensurePlayer().then(() => { setSpotifyActive(true); }).catch(() => {
@@ -463,11 +627,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     return () => {
       if (sleepRef.current) clearTimeout(sleepRef.current);
+      if (connectPollRef.current) { clearInterval(connectPollRef.current); connectPollRef.current = null; }
       if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       playerRef.current?.disconnect();
       playerRef.current = null; deviceIdRef.current = null; initPromiseRef.current = null;
     };
-  }, [ensurePlayer, reportPlaybackError, setConnectionState]);
+  }, [ensurePlayer, reportPlaybackError, setConnectionState, fetchDevices]);
 
   // ── DESKTOP progress ticker ────────────────────────────────────────────────
   useEffect(() => {
@@ -491,10 +656,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     currentTrack, queue, isPlaying, progress, duration, volume,
     shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt,
     playerStatus, statusMessage, isSpotifyReady: playerStatus === "ready", spotifyActive,
+    connectMode, connectAvailable, connectDevices,
     playTrack, togglePlay, nextTrack, previousTrack,
     toggleFavorite, isFavorite, setProgress, setVolume,
     toggleShuffle, toggleRepeat, startSleep, cancelSleep,
-  }), [currentTrack, queue, isPlaying, progress, duration, volume, shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt, playerStatus, statusMessage, spotifyActive, playTrack, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite, setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep]);
+    setPlaybackMode, refreshDevices, useConnectDevice,
+  }), [currentTrack, queue, isPlaying, progress, duration, volume, shuffleEnabled, repeatEnabled, favorites, sleepMinutes, sleepEndsAt, playerStatus, statusMessage, spotifyActive, connectMode, connectAvailable, connectDevices, playTrack, togglePlay, nextTrack, previousTrack, toggleFavorite, isFavorite, setProgress, setVolume, toggleShuffle, toggleRepeat, startSleep, cancelSleep, setPlaybackMode, refreshDevices, useConnectDevice]);
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
