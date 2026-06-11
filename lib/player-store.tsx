@@ -48,6 +48,8 @@ const previewCache = new Map<string, string>();
 async function resolvePreviewUrl(track: Track): Promise<string | null> {
   const cached = previewCache.get(track.id);
   if (cached) return cached;
+  // Si el track ya trae el preview resuelto (p. ej. resultados del buscador), úsalo directo.
+  if (track.audioSrc) { previewCache.set(track.id, track.audioSrc); return track.audioSrc; }
   try {
     const r = await fetch(`/api/music/resolve?q=${encodeURIComponent(track.spotifyQuery)}`, { cache: "force-cache" });
     if (!r.ok) return null;

@@ -31,6 +31,7 @@ function toTrack(r: SearchResult): Track {
     genre: "salsa",
     durationSeconds: r.durationSeconds,
     cover: r.artwork || "/images/hero.jpg",
+    audioSrc: r.previewUrl,            // preview ya resuelto: evita re-resolver al reproducir
     spotifyQuery: `${r.title} ${r.artist}`,
   };
 }
@@ -92,7 +93,7 @@ export default function BuscarPage() {
   const handlePlay = (r: SearchResult) => playTrack(toTrack(r));
 
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", paddingBottom: "calc(78px + env(safe-area-inset-bottom) + 96px)" }}>
+    <div>
       <div style={{ padding: "calc(env(safe-area-inset-top) + 18px) 22px 0" }}>
         <div style={{ fontWeight: 900, fontSize: "calc(2rem * var(--fz))", letterSpacing: "-0.5px", marginBottom: 14 }}>
           Buscar
@@ -188,6 +189,6 @@ export default function BuscarPage() {
           })}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
