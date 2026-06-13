@@ -20,6 +20,7 @@ export type Track = {
   cover: string;
   audioSrc?: string;
   spotifyQuery: string;
+  youtubeId?: string;
 };
 
 export type Decade = {

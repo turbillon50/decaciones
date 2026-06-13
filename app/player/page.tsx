@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePlayer, formatTime } from "@/lib/player-store";
 
@@ -184,7 +184,14 @@ export default function PlayerPage() {
     setProgress, setVolume, toggleShuffle, toggleRepeat,
     toggleFavorite, isFavorite,
     playerStatus, statusMessage,
+    registerVideoSlot,
   } = usePlayer();
+
+  const videoSlotRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    registerVideoSlot(videoSlotRef.current);
+    return () => registerVideoSlot(null);
+  }, [registerVideoSlot]);
 
   const { ok: authed } = useHouseAuth();
   const [showAuth, setShowAuth] = useState(false);
@@ -254,17 +261,14 @@ export default function PlayerPage() {
 
       {/* Artwork */}
       <div style={{ padding:"20px 28px", flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <div style={{
+        <div ref={videoSlotRef} style={{
           width:"100%", aspectRatio:"1/1", maxHeight:320,
           borderRadius:20, overflow:"hidden",
           boxShadow:"0 30px 70px rgba(0,0,0,0.8)",
+          backgroundImage:`url(${currentTrack.cover})`, backgroundSize:"cover", backgroundPosition:"center", backgroundColor:"#111",
           transform: isPlaying ? "scale(1)" : "scale(0.94)",
           transition:"transform 0.4s cubic-bezier(.2,.8,.4,1)",
-        }}>
-          <img src={currentTrack.cover} alt={currentTrack.title}
-            onError={e=>{(e.target as HTMLImageElement).src="/images/hero.jpg";}}
-            style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
-        </div>
+        }} />
       </div>
 
       {/* Track info + fav */}
