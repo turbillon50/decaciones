@@ -341,6 +341,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const player = playerRef.current;
       if (player?.activateElement) await player.activateElement().catch(() => {});
       const deviceId = await ensurePlayer();
+      if (playerRef.current?.activateElement) await playerRef.current.activateElement().catch(() => {});
       const uri = await resolveTrackUri(track);
       let token = await getHouseToken();
       let r = await playOnDevice(token, deviceId, uri);
@@ -452,19 +453,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const playTrack = useCallback((track: Track, nextQueue?: Track[]) => {
     const q = nextQueue && nextQueue.some(t => t.id === track.id) ? nextQueue : [track];
     setQueue(q);
-    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(track); else playLocalAudio(track); }
+    // Siempre intentar Connect (usa la cuenta house).
+    // Si no hay dispositivo activo → cae a iTunes preview automáticamente.
+    if (connectModeRef.current) void playConnectTrack(track);
     else void playSpotifyTrack(track);
   }, [playLocalAudio, playConnectTrack, playSpotifyTrack, setQueue]);
 
   const nextTrack = useCallback(() => {
     const next = pickNextTrack(queueRef.current, currentTrackRef.current, shuffleRef.current);
-    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(next); else playLocalAudio(next); }
+    if (connectModeRef.current) void playConnectTrack(next);
     else void playSpotifyTrack(next);
   }, [playLocalAudio, playConnectTrack, playSpotifyTrack]);
 
   const previousTrack = useCallback(() => {
     const prev = pickPreviousTrack(queueRef.current, currentTrackRef.current);
-    if (isMobileRef.current) { if (connectModeRef.current) void playConnectTrack(prev); else playLocalAudio(prev); }
+    if (connectModeRef.current) void playConnectTrack(prev);
     else void playSpotifyTrack(prev);
   }, [playLocalAudio, playConnectTrack, playSpotifyTrack]);
 
@@ -599,32 +602,33 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   // ── MOBILE vs DESKTOP init ─────────────────────────────────────────────────
   useEffect(() => {
-    isMobileRef.current = isMobileDevice();
-    if (isMobileRef.current) {
-      // Mobile: listo de inmediato con audio local (previews). Si hay un Spotify
-      // abierto en el telefono y el usuario no eligio "preview", pasa a Connect (completas).
+    isMobileRef.current = false;
+    let savedMode: string | null = null;
+    try { savedMode = localStorage.getItem(playbackModeKey); } catch {}
+
+    if (savedMode === "connect") {
+      // El usuario eligio Connect (controlar un Spotify externo). Respetarlo.
       setConnectionState("ready", null);
       void (async () => {
-        let saved: string | null = null;
-        try { saved = localStorage.getItem(playbackModeKey); } catch {}
-        if (saved === "preview") return;
         const devices = await fetchDevices();
         if (devices.length > 0) {
           const active = devices.find(d => d.is_active) ?? devices[0];
           connectDeviceRef.current = active.id;
           connectModeRef.current = true;
           if (mountedRef.current) setConnectMode(true);
-          try { localStorage.setItem(playbackModeKey, "connect"); } catch {}
         }
       })();
     } else {
-      // Desktop: intenta Spotify (audio completo, requiere Premium). Si falla, cae a previews iTunes (nunca mudo).
+      // Default en movil + escritorio: reproductor dentro del navegador via Web
+      // Playback SDK = canciones completas. Si el SDK no puede (sin Premium / sin
+      // EME), cae a previews iTunes (nunca mudo).
       void ensurePlayer().then(() => { setSpotifyActive(true); }).catch(() => {
         isMobileRef.current = true;
         setSpotifyActive(false);
         setConnectionState("ready", null);
       });
     }
+
     return () => {
       if (sleepRef.current) clearTimeout(sleepRef.current);
       if (connectPollRef.current) { clearInterval(connectPollRef.current); connectPollRef.current = null; }

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 type Body = {
   uri?: string;
   deviceId?: string;
-  action?: "play" | "pause" | "resume" | "seek" | "volume";
+  action?: "play" | "pause" | "resume" | "seek" | "volume" | "transfer";
   position?: number; // ms (seek)
   volume?: number; // 0-100 (volume)
 };
@@ -44,6 +44,14 @@ export async function POST(request: NextRequest) {
       case "resume":
         res = await fetch(withDevice(`${base}/play`, deviceId), { method: "PUT", headers: auth });
         break;
+      case "transfer": {
+        if (!deviceId) return NextResponse.json({ error: "missing_device_id" }, { status: 400 });
+        res = await fetch(`${base}`, {
+          method: "PUT", headers: auth,
+          body: JSON.stringify({ device_ids: [deviceId], play: true }),
+        });
+        break;
+      }
       case "seek": {
         const ms = Math.max(0, Math.round(Number(position) || 0));
         res = await fetch(withDevice(`${base}/seek?position_ms=${ms}`, deviceId), { method: "PUT", headers: auth });
