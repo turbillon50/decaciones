@@ -164,12 +164,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // ── Video host positioning (teleport sobre el slot del player) ──
   const setAudioOnly = useCallback(() => {
     const h = hostRef.current; if (!h) return;
-    // Mini VISIBLE: los navegadores bloquean el audio en iframes invisibles (1px/opacity:0).
-    h.style.position = "fixed"; h.style.right = "10px"; h.style.left = "auto";
-    h.style.bottom = "calc(150px + env(safe-area-inset-bottom))"; h.style.top = "auto";
-    h.style.width = "116px"; h.style.height = "66px"; h.style.opacity = "1";
-    h.style.pointerEvents = "none"; h.style.zIndex = "60"; h.style.overflow = "hidden";
-    h.style.borderRadius = "12px"; h.style.boxShadow = "0 8px 24px rgba(0,0,0,0.5)";
+    // Oculto (solo audio). El video se ve unicamente en la pantalla /player.
+    h.style.position = "fixed"; h.style.left = "0"; h.style.top = "0"; h.style.right = "auto"; h.style.bottom = "auto";
+    h.style.width = "1px"; h.style.height = "1px"; h.style.opacity = "0";
+    h.style.pointerEvents = "none"; h.style.zIndex = "-1"; h.style.overflow = "hidden";
+    h.style.borderRadius = "0"; h.style.boxShadow = "none";
   }, []);
   const positionOverSlot = useCallback(() => {
     const h = hostRef.current; const el = slotElRef.current;

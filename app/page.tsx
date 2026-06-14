@@ -70,7 +70,7 @@ export default function Home() {
         <h2 style={{ padding: "0 22px", fontSize: "calc(1.4rem * var(--fz))", fontWeight: 800, marginBottom: 14 }}>Tus favoritos</h2>
         <div style={{ display: "flex", gap: 16, overflowX: "auto", padding: "0 22px 6px" }}>
           {preloaded.map((t) => (
-            <button key={t.id} onClick={() => { playTrack(t, preloaded); notify("Reproduciendo " + t.title, "▶"); }}
+            <button key={t.id} onClick={() => { playTrack(t, preloaded); router.push("/player"); notify("Reproduciendo " + t.title, "▶"); }}
               style={{ flex: "0 0 auto", width: 130, textAlign: "center" }}>
               <div style={{ width: 130, height: 130, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow)", border: "3px solid var(--surface-2)" }}>
                 <Cover track={t} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -85,7 +85,7 @@ export default function Home() {
       <section style={{ marginTop: 32 }}>
         <h2 style={{ padding: "0 22px", fontSize: "calc(1.4rem * var(--fz))", fontWeight: 800, marginBottom: 6 }}>Hojea tus discos</h2>
         <p style={{ padding: "0 22px", color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginBottom: 8 }}>Desliza como si pasaras vinilos</p>
-        <CoverFlow tracks={queue} onSelect={(t, q) => { playTrack(t, q); notify("Reproduciendo " + t.title, "▶"); }} />
+        <CoverFlow tracks={queue} onSelect={(t, q) => { playTrack(t, q); router.push("/player"); notify("Reproduciendo " + t.title, "▶"); }} />
       </section>
 
       {/* EPOCAS */}

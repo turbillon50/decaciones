@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useRef } from "react";
 import { usePlayer } from "@/lib/player-store";
 import Cover from "@/components/Cover";
 import Icon from "@/components/Icon";
@@ -16,16 +15,9 @@ export default function NowPlayingBar() {
     duration,
     playerStatus,
     statusMessage,
-    registerVideoSlot,
   } = usePlayer();
   const router = useRouter();
   const pathname = usePathname();
-  const videoSlotRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (pathname === "/player") { registerVideoSlot(null); return; }
-    registerVideoSlot(videoSlotRef.current);
-    return () => registerVideoSlot(null);
-  }, [registerVideoSlot, pathname]);
   if (pathname === "/player") return null;
   const pct = duration ? Math.min(100, (progress / duration) * 100) : 0;
   const needsAttention = playerStatus === "disconnected" || playerStatus === "error";
@@ -38,9 +30,7 @@ export default function NowPlayingBar() {
           bottom: "calc(78px + env(safe-area-inset-bottom) + 12px)", zIndex: 70 }}>
         <div className="glass" style={{ borderRadius: 22, boxShadow: "var(--shadow)", overflow: "hidden" }}>
           <div onClick={() => router.push("/player")} style={{ display: "flex", alignItems: "center", gap: 14, padding: 12, cursor: "pointer" }}>
-            <div ref={videoSlotRef} style={{ width: 58, height: 58, borderRadius: 14, overflow: "hidden", flex: "0 0 auto", position: "relative", background: "#111" }}>
-              <Cover track={currentTrack} style={{ width: 58, height: 58, borderRadius: 14, objectFit: "cover" }} />
-            </div>
+            <Cover track={currentTrack} style={{ width: 58, height: 58, borderRadius: 14, objectFit: "cover", flex: "0 0 auto" }} />
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: "calc(1.05rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{currentTrack.title}</div>
               <div style={{ color: needsAttention ? "var(--gold)" : "var(--text-soft)", fontWeight: needsAttention ? 700 : 500, fontSize: "calc(0.9rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{statusMessage ?? currentTrack.artist}</div>
