@@ -10,6 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import NowPlayingBar from "@/components/NowPlayingBar";
 import AddToPlaylistSheet from "@/components/AddToPlaylistSheet";
 import ConnectBanner from "@/components/ConnectBanner";
+import PWARegister from "@/components/PWARegister";
 import { usePathname } from "next/navigation";
 
 function Chrome({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
       {!isPlayer && <BottomNav />}
       {!isPlayer && <ConnectBanner />}
       <AddToPlaylistSheet />
+      <PWARegister />
     </>
   );
 }
