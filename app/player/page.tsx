@@ -3,77 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePlayer, formatTime } from "@/lib/player-store";
 
-// ── Contraseña de casa ────────────────────────────────────────────────────────
-const HOUSE_PASS = "decaciones2025";
-const PASS_KEY = "dec:houseAuth";
-
-function useHouseAuth() {
-  const [ok, setOk] = useState<boolean | null>(null);
-  useEffect(() => {
-    try { setOk(sessionStorage.getItem(PASS_KEY) === "1"); }
-    catch { setOk(false); }
-  }, []);
-  const auth = (pass: string) => {
-    if (pass === HOUSE_PASS) {
-      sessionStorage.setItem(PASS_KEY, "1");
-      setOk(true);
-      return true;
-    }
-    return false;
-  };
-  return { ok, auth };
-}
-
-// ── Pantalla de contraseña ────────────────────────────────────────────────────
-function PasswordGate({ onAuth }: { onAuth: () => void }) {
-  const [val, setVal] = useState("");
-  const [err, setErr] = useState(false);
-  const { auth } = useHouseAuth();
-
-  function submit() {
-    if (auth(val)) { onAuth(); }
-    else { setErr(true); setTimeout(() => setErr(false), 1200); }
-  }
-
-  return (
-    <div style={{
-      position:"fixed", inset:0, background:"#000", zIndex:200,
-      display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
-      gap:24, padding:32,
-    }}>
-      <div style={{ fontSize:48 }}>🎵</div>
-      <div style={{ textAlign:"center" }}>
-        <div style={{ fontSize:22, fontWeight:700, color:"#fff", marginBottom:6 }}>Decaciones</div>
-        <div style={{ fontSize:14, color:"rgba(255,255,255,0.4)" }}>Ingresa la contraseña para escuchar</div>
-      </div>
-      <input
-        type="password"
-        value={val}
-        onChange={e => setVal(e.target.value)}
-        onKeyDown={e => e.key === "Enter" && submit()}
-        placeholder="Contraseña"
-        autoFocus
-        style={{
-          width:"100%", maxWidth:280, padding:"14px 18px",
-          borderRadius:14, fontSize:16, textAlign:"center",
-          background: err ? "rgba(255,59,48,0.15)" : "rgba(255,255,255,0.07)",
-          border: `1px solid ${err ? "rgba(255,59,48,0.5)" : "rgba(255,255,255,0.12)"}`,
-          color:"#fff", outline:"none",
-          transition:"all 0.2s",
-        }}
-      />
-      <button onClick={submit} style={{
-        width:"100%", maxWidth:280, padding:"14px 0",
-        borderRadius:14, fontSize:16, fontWeight:700,
-        background:"#fff", color:"#000", border:"none", cursor:"pointer",
-      }}>
-        Entrar
-      </button>
-      {err && <div style={{ fontSize:13, color:"#ff3b30" }}>Contraseña incorrecta</div>}
-    </div>
-  );
-}
-
 // ── Selector de dispositivos Spotify ─────────────────────────────────────────
 type Device = { id: string | null; name: string; type: string; is_active: boolean };
 
@@ -189,18 +118,13 @@ export default function PlayerPage() {
 
   const videoSlotRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    registerVideoSlot(videoSlotRef.current);
+    registerVideoSlot(videoSlotRef.current, true);
     return () => registerVideoSlot(null);
   }, [registerVideoSlot]);
 
-  const { ok: authed } = useHouseAuth();
-  const [showAuth, setShowAuth] = useState(false);
   const [showDevices, setShowDevices] = useState(false);
 
   // Mostrar gate de contraseña si no está autenticado
-  useEffect(() => {
-    if (authed === false) setShowAuth(true);
-  }, [authed]);
 
   const pct = Math.min(100, (progress / (duration || currentTrack.durationSeconds || 1)) * 100);
   const fav = isFavorite(currentTrack.id);
@@ -210,9 +134,6 @@ export default function PlayerPage() {
     setProgress((e.clientX - rect.left) / rect.width * (duration || currentTrack.durationSeconds));
   }
 
-  if (showAuth && authed === false) {
-    return <PasswordGate onAuth={() => setShowAuth(false)} />;
-  }
 
   return (
     <main style={{
