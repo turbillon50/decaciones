@@ -1,5 +1,4 @@
 "use client";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/lib/theme";
 import { usePlayer } from "@/lib/player-store";
@@ -10,15 +9,9 @@ import Icon from "@/components/Icon";
 export default function SettingsPage() {
   const router = useRouter();
   const { mode, setMode, textSize, setTextSize } = useTheme();
-  const {
-    sleepMinutes, startSleep, cancelSleep, spotifyActive,
-    connectMode, connectAvailable, connectDevices,
-    setPlaybackMode, refreshDevices, useConnectDevice,
-  } = usePlayer();
+  const { sleepMinutes, startSleep, cancelSleep } = usePlayer();
   const { notify } = useToast();
 
-  // Refresca dispositivos Spotify al abrir Ajustes (detecta el telefono con Spotify abierto).
-  useEffect(() => { void refreshDevices(); }, [refreshDevices]);
   const sizes: { id: "normal" | "grande" | "enorme"; label: string }[] = [
     { id: "normal", label: "Normal" }, { id: "grande", label: "Grande" }, { id: "enorme", label: "Enorme" },
   ];
@@ -60,51 +53,10 @@ export default function SettingsPage() {
           </div>
         </Row>
         <Row>
-          <Label icon="play" text="Spotify" />
-          <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginBottom: 12, lineHeight: 1.4 }}>
-            {spotifyActive ? "Audio completo activado (cuenta Premium conectada)." : "Conecta tu cuenta Spotify Premium para escuchar canciones completas. Sin conexion suenan previews de 30s."}
+          <Label icon="play" text="Reproduccion" />
+          <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", lineHeight: 1.4 }}>
+            Las canciones suenan completas y con video, directo desde YouTube. No necesitas iniciar sesion ni instalar nada.
           </div>
-          <button onClick={() => { window.location.href = "/api/auth/spotify"; }} style={{ ...seg(true), width: "100%" }}>
-            {spotifyActive ? "Reconectar Spotify" : "Iniciar sesion con Spotify"}
-          </button>
-        </Row>
-        <Row>
-          <Label icon="play" text="Reproducir en" />
-          <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginBottom: 12, lineHeight: 1.4 }}>
-            {connectMode
-              ? "Spotify Connect: controlas la app de Spotify de tu telefono (canciones completas)."
-              : "Este dispositivo: suenan previews de 30s desde la app."}
-          </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => setPlaybackMode("preview")} style={seg(!connectMode)}>Este dispositivo</button>
-            <button onClick={() => setPlaybackMode("connect")} style={seg(connectMode)}>Spotify Connect</button>
-          </div>
-        </Row>
-        <Row>
-          <Label icon="bluetooth" text="Spotify Connect" />
-          <div style={{ color: "var(--text-soft)", fontSize: "calc(0.95rem * var(--fz))", marginBottom: 12, lineHeight: 1.4 }}>
-            {connectDevices.length > 0
-              ? "Dispositivos detectados. Toca Usar para reproducir las canciones completas ahi."
-              : "No detectamos dispositivos. Abre Spotify en tu telefono y vuelve a buscar."}
-          </div>
-          {connectDevices.map((d) => (
-            <div key={d.id ?? d.name} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, background: "var(--surface-2)", marginBottom: 10 }}>
-              <span style={{ color: "var(--gold)" }}><Icon name="play" size={22} /></span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: "calc(1rem * var(--fz))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.name}</div>
-                <div style={{ color: "var(--text-soft)", fontSize: "calc(0.82rem * var(--fz))" }}>{d.type}{d.is_active ? " · activo" : ""}</div>
-              </div>
-              <button onClick={() => { useConnectDevice(d.id); }} style={{ ...seg(connectMode && connectDevices.length === 1), flex: "0 0 auto", padding: "10px 18px" }}>Usar</button>
-            </div>
-          ))}
-          <button onClick={() => { void refreshDevices().then((ds) => notify(ds.length ? `${ds.length} dispositivo(s)` : "Abre Spotify en tu telefono", "🎧")); }} style={{ ...seg(false), width: "100%" }}>
-            Buscar dispositivos
-          </button>
-          {!connectAvailable && (
-            <div style={{ color: "var(--text-soft)", fontSize: "calc(0.82rem * var(--fz))", marginTop: 10, textAlign: "center" }}>
-              Tip: tu telefono debe tener la sesion de Spotify de la casa abierta.
-            </div>
-          )}
         </Row>
         <button onClick={() => router.push("/bluetooth")} className="glass" style={{ width: "100%", borderRadius: 20, padding: 20, display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
           <span style={{ color: "var(--gold)" }}><Icon name="bluetooth" size={26} /></span>

@@ -287,15 +287,15 @@ export default function PlayerPage() {
 
       {/* Status / device indicator */}
       <div style={{ padding:"0 28px 12px" }}>
-        <button onClick={() => setShowDevices(true)} style={{
+        <button onClick={() => {}} style={{
           display:"flex", alignItems:"center", gap:8,
           background:"none", border:"none", cursor:"pointer", padding:0,
         }}>
-          <span style={{ fontSize:13, color: playerStatus === "ready" ? "#1DB954" : "rgba(255,255,255,0.35)" }}>
+          <span style={{ fontSize:13, color: playerStatus === "ready" ? "#fbbf24" : "rgba(255,255,255,0.35)" }}>
             {playerStatus === "connecting" ? "⏳ Conectando..." :
-             playerStatus === "ready" ? "🎵 Reproduciendo en Spotify" :
+             playerStatus === "ready" ? "▶ En reproducción" :
              playerStatus === "error" ? "⚠️ " + (statusMessage ?? "Sin dispositivo") :
-             "📱 Abre Spotify para escuchar"}
+             "Toca play para escuchar"}
           </span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
             <path d="M9 18l6-6-6-6"/>

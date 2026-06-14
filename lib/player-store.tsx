@@ -163,9 +163,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   // ── Video host positioning (teleport sobre el slot del player) ──
   const setAudioOnly = useCallback(() => {
     const h = hostRef.current; if (!h) return;
-    h.style.position = "fixed"; h.style.left = "0"; h.style.top = "0";
-    h.style.width = "1px"; h.style.height = "1px"; h.style.opacity = "0";
-    h.style.pointerEvents = "none"; h.style.zIndex = "-1"; h.style.overflow = "hidden"; h.style.borderRadius = "0";
+    // Mini VISIBLE: los navegadores bloquean el audio en iframes invisibles (1px/opacity:0).
+    h.style.position = "fixed"; h.style.right = "10px"; h.style.left = "auto";
+    h.style.bottom = "calc(150px + env(safe-area-inset-bottom))"; h.style.top = "auto";
+    h.style.width = "116px"; h.style.height = "66px"; h.style.opacity = "1";
+    h.style.pointerEvents = "none"; h.style.zIndex = "60"; h.style.overflow = "hidden";
+    h.style.borderRadius = "12px"; h.style.boxShadow = "0 8px 24px rgba(0,0,0,0.5)";
   }, []);
   const positionOverSlot = useCallback(() => {
     const h = hostRef.current; const el = slotElRef.current;
@@ -174,7 +177,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const r = el.getBoundingClientRect();
     h.style.position = "fixed"; h.style.left = `${r.left}px`; h.style.top = `${r.top}px`;
     h.style.width = `${r.width}px`; h.style.height = `${r.height}px`; h.style.opacity = "1";
-    h.style.pointerEvents = "auto"; h.style.zIndex = "5"; h.style.overflow = "hidden"; h.style.borderRadius = "20px";
+    h.style.pointerEvents = "none"; h.style.zIndex = "5"; h.style.overflow = "hidden"; h.style.borderRadius = "20px";
+    h.style.boxShadow = "none"; h.style.right = "auto"; h.style.bottom = "auto";
   }, [setAudioOnly]);
 
   // ── INIT: crear host, cargar API, crear player (una vez) ──
@@ -196,7 +200,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       const YT = window.YT;
       const player = new YT.Player(mount, {
         width: "100%", height: "100%", videoId: "",
-        playerVars: { autoplay: 0, playsinline: 1, controls: 1, rel: 0, modestbranding: 1, fs: 1 },
+        playerVars: { autoplay: 0, playsinline: 1, controls: 0, rel: 0, modestbranding: 1, fs: 0, disablekb: 1, iv_load_policy: 3 },
         events: {
           onReady: () => {
             readyRef.current = true; ytRef.current = player;
