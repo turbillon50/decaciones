@@ -6,7 +6,11 @@ export type GenreId =
   | "cumbia"
   | "reggaeton"
   | "electronica"
-  | "romanticas";
+  | "romanticas"
+  | "electronica-90s"
+  | "disco"
+  | "tribal-antro"
+  | "navidad";
 
 export type Track = {
   id: string;

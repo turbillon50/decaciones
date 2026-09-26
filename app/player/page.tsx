@@ -3,108 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePlayer, formatTime } from "@/lib/player-store";
 
-// ── Selector de dispositivos Spotify ─────────────────────────────────────────
-type Device = { id: string | null; name: string; type: string; is_active: boolean };
-
-function DevicePicker({ onPicked }: { onPicked: () => void }) {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [picking, setPicking] = useState<string | null>(null);
-
-  async function load() {
-    setLoading(true);
-    try {
-      const r = await fetch("/api/spotify/devices");
-      const d = await r.json();
-      setDevices(d.devices ?? []);
-    } catch {}
-    setLoading(false);
-  }
-
-  useEffect(() => { void load(); }, []);
-
-  async function pick(deviceId: string | null) {
-    if (!deviceId) return;
-    setPicking(deviceId);
-    // Transferir playback a este dispositivo
-    await fetch("/api/spotify/connect-play", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "transfer", deviceId }),
-    });
-    setPicking(null);
-    onPicked();
-  }
-
-  const ICONS: Record<string, string> = {
-    Smartphone: "📱", Computer: "💻", Speaker: "🔊",
-    TV: "📺", Tablet: "📟", GameConsole: "🎮",
-  };
-
-  if (loading) return (
-    <div style={{ padding:"60px 20px", textAlign:"center", color:"rgba(255,255,255,0.3)", fontSize:14 }}>
-      Buscando dispositivos...
-    </div>
-  );
-
-  if (devices.length === 0) return (
-    <div style={{ padding:"40px 20px", textAlign:"center" }}>
-      <div style={{ fontSize:40, marginBottom:12 }}>📱</div>
-      <div style={{ fontSize:16, fontWeight:600, color:"#fff", marginBottom:8 }}>Abre Spotify</div>
-      <div style={{ fontSize:13, color:"rgba(255,255,255,0.4)", marginBottom:20 }}>
-        Abre Spotify en tu celular o computadora, luego vuelve aquí.
-      </div>
-      <button onClick={load} style={{
-        padding:"10px 24px", borderRadius:20, background:"rgba(255,255,255,0.1)",
-        border:"1px solid rgba(255,255,255,0.15)", color:"#fff", fontSize:14, cursor:"pointer",
-      }}>
-        Reintentar
-      </button>
-    </div>
-  );
-
-  return (
-    <div style={{ padding:"20px 0" }}>
-      <div style={{ fontSize:13, color:"rgba(255,255,255,0.4)", padding:"0 20px 14px", textAlign:"center" }}>
-        ¿En qué dispositivo suena?
-      </div>
-      {devices.map(d => (
-        <button key={d.id ?? d.name} onClick={() => void pick(d.id)}
-          disabled={picking !== null}
-          style={{
-            display:"flex", alignItems:"center", gap:14,
-            width:"100%", padding:"14px 20px", textAlign:"left",
-            background: d.is_active ? "rgba(29,185,84,0.1)" : "transparent",
-            border:"none",
-            borderBottom:"1px solid rgba(255,255,255,0.05)",
-            cursor:"pointer",
-            transition:"background 0.15s",
-          }}>
-          <span style={{ fontSize:26 }}>{ICONS[d.type] ?? "🔊"}</span>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:15, fontWeight:500, color:"#fff" }}>{d.name}</div>
-            <div style={{ fontSize:11, color: d.is_active ? "#1DB954" : "rgba(255,255,255,0.35)", marginTop:2 }}>
-              {d.is_active ? "Reproduciendo aquí" : d.type}
-            </div>
-          </div>
-          {picking === d.id && <span style={{ fontSize:12, color:"rgba(255,255,255,0.4)" }}>...</span>}
-          {d.is_active && <span style={{ fontSize:16, color:"#1DB954" }}>✓</span>}
-        </button>
-      ))}
-      <div style={{ padding:"12px 20px" }}>
-        <button onClick={load} style={{
-          width:"100%", padding:"10px 0", borderRadius:12,
-          background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.08)",
-          color:"rgba(255,255,255,0.5)", fontSize:13, cursor:"pointer",
-        }}>
-          Actualizar dispositivos
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ── Player principal ──────────────────────────────────────────────────────────
 export default function PlayerPage() {
   const {
     currentTrack, isPlaying, progress, duration,
@@ -122,10 +20,6 @@ export default function PlayerPage() {
     return () => registerVideoSlot(null);
   }, [registerVideoSlot]);
 
-  const [showDevices, setShowDevices] = useState(false);
-
-  // Mostrar gate de contraseña si no está autenticado
-
   const pct = Math.min(100, (progress / (duration || currentTrack.durationSeconds || 1)) * 100);
   const fav = isFavorite(currentTrack.id);
 
@@ -134,7 +28,6 @@ export default function PlayerPage() {
     setProgress((e.clientX - rect.left) / rect.width * (duration || currentTrack.durationSeconds));
   }
 
-
   return (
     <main style={{
       background:"#000", minHeight:"100vh",
@@ -142,33 +35,6 @@ export default function PlayerPage() {
       padding:"0 0 24px",
       paddingTop:"env(safe-area-inset-top, 0px)",
     }}>
-
-      {/* Device picker modal */}
-      {showDevices && (
-        <div style={{
-          position:"fixed", inset:0, zIndex:100,
-          background:"rgba(0,0,0,0.85)", backdropFilter:"blur(20px)",
-          display:"flex", flexDirection:"column", justifyContent:"flex-end",
-        }} onClick={e => { if (e.target === e.currentTarget) setShowDevices(false); }}>
-          <div style={{
-            background:"#1c1c1c", borderRadius:"20px 20px 0 0",
-            border:"1px solid rgba(255,255,255,0.1)",
-            maxHeight:"80vh", overflowY:"auto",
-          }}>
-            <div style={{
-              display:"flex", justifyContent:"space-between", alignItems:"center",
-              padding:"18px 20px 0",
-            }}>
-              <span style={{ fontSize:17, fontWeight:700, color:"#fff" }}>Dispositivos</span>
-              <button onClick={() => setShowDevices(false)} style={{
-                background:"none", border:"none", color:"rgba(255,255,255,0.5)",
-                fontSize:20, cursor:"pointer", padding:4,
-              }}>✕</button>
-            </div>
-            <DevicePicker onPicked={() => setShowDevices(false)} />
-          </div>
-        </div>
-      )}
 
       {/* Back */}
       <div style={{ padding:"16px 20px 0" }}>
@@ -180,16 +46,43 @@ export default function PlayerPage() {
         </Link>
       </div>
 
-      {/* Artwork */}
+      {/* Video slot — el iframe de YouTube se teleporta aquí */}
       <div style={{ padding:"20px 28px", flex:1, display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <div ref={videoSlotRef} style={{
-          width:"100%", aspectRatio:"1/1", maxHeight:320,
-          borderRadius:20, overflow:"hidden",
-          boxShadow:"0 30px 70px rgba(0,0,0,0.8)",
-          backgroundImage:`url(${currentTrack.cover})`, backgroundSize:"cover", backgroundPosition:"center", backgroundColor:"#111",
-          transform: isPlaying ? "scale(1)" : "scale(0.94)",
-          transition:"transform 0.4s cubic-bezier(.2,.8,.4,1)",
-        }} />
+        <div style={{ position:"relative", width:"100%", aspectRatio:"1/1", maxHeight:320 }}>
+          {/* slot donde se pega el iframe */}
+          <div ref={videoSlotRef} style={{
+            width:"100%", height:"100%",
+            borderRadius:20, overflow:"hidden",
+            boxShadow:"0 30px 70px rgba(0,0,0,0.8)",
+            backgroundImage:`url(${currentTrack.cover})`, backgroundSize:"cover", backgroundPosition:"center", backgroundColor:"#111",
+            transform: isPlaying ? "scale(1)" : "scale(0.94)",
+            transition:"transform 0.4s cubic-bezier(.2,.8,.4,1)",
+          }} />
+          {/* Overlay tap-to-play: visible solo cuando no está sonando, fuerza gesto del usuario */}
+          {!isPlaying && (
+            <button
+              onClick={togglePlay}
+              aria-label="Reproducir"
+              style={{
+                position:"absolute", inset:0, borderRadius:20,
+                background:"rgba(0,0,0,0.35)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                border:"none", cursor:"pointer", zIndex:10,
+              }}
+            >
+              <div style={{
+                width:72, height:72, borderRadius:"50%",
+                background:"rgba(255,255,255,0.92)",
+                display:"flex", alignItems:"center", justifyContent:"center",
+                boxShadow:"0 8px 32px rgba(0,0,0,0.5)",
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24">
+                  <polygon points="5 3 19 12 5 21 5 3" fill="#000"/>
+                </svg>
+              </div>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Track info + fav */}
@@ -206,22 +99,14 @@ export default function PlayerPage() {
         </button>
       </div>
 
-      {/* Status / device indicator */}
+      {/* Status */}
       <div style={{ padding:"0 28px 12px" }}>
-        <button onClick={() => {}} style={{
-          display:"flex", alignItems:"center", gap:8,
-          background:"none", border:"none", cursor:"pointer", padding:0,
-        }}>
-          <span style={{ fontSize:13, color: playerStatus === "ready" ? "#fbbf24" : "rgba(255,255,255,0.35)" }}>
-            {playerStatus === "connecting" ? "⏳ Conectando..." :
-             playerStatus === "ready" ? "▶ En reproducción" :
-             playerStatus === "error" ? "⚠️ " + (statusMessage ?? "Sin dispositivo") :
-             "Toca play para escuchar"}
-          </span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
-        </button>
+        <span style={{ fontSize:13, color: playerStatus === "ready" && isPlaying ? "#fbbf24" : "rgba(255,255,255,0.35)" }}>
+          {playerStatus === "connecting" ? "⏳ Conectando..." :
+           isPlaying ? "▶ En reproducción" :
+           statusMessage ? "⚠️ " + statusMessage :
+           "Toca play para escuchar"}
+        </span>
       </div>
 
       {/* Seek */}

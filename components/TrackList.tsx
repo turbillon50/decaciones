@@ -27,7 +27,7 @@ export default function TrackList({
         return (
           <div key={t.id} className="glass" style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 18,
             outline: active ? "2px solid var(--gold)" : "none" }}>
-            <button onClick={() => { playTrack(t, tracks); router.push("/player"); notify("Reproduciendo " + t.title, "▶"); }}
+            <button onClick={() => { playTrack(t, tracks); notify("Reproduciendo " + t.title, "▶"); setTimeout(() => router.push("/player"), 80); }}
               style={{ display: "flex", alignItems: "center", gap: 14, flex: 1, minWidth: 0, textAlign: "left" }}>
               <div style={{ position: "relative", width: 60, height: 60, borderRadius: 12, overflow: "hidden", flex: "0 0 auto" }}>
                 <Cover track={t} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
